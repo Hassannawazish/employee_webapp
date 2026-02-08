@@ -53,6 +53,4 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
-.vs/EmployeeAdminPortal.slnx/FileContentIndex/
-.vs/EmployeeAdminPortal.slnx/v18
-.vs/EmployeeAdminPortal.slnx/DesignTimeBuild
+**/.vs/
