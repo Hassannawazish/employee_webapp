@@ -8,6 +8,7 @@ $ dotnet new webapi -o api
 For running the .NET web application.
 
 ```bash
+$ cd api
 $ dotnet watch run
 ```
 
