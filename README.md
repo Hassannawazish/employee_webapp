@@ -26,3 +26,8 @@ $ dotnet ef migrations add init
 ```bash
 $ dotnet ef database update
 ```
+in case of change in db and for updating, 
+```bash
+$ dotnet ef migrations add InitialCreate
+$ dotnet ef database update
+```
