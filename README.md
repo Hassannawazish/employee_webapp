@@ -31,3 +31,5 @@ in case of change in db and for updating,
 $ dotnet ef migrations add InitialCreate
 $ dotnet ef database update
 ```
+DTO's (Data Transfer Objects) To convert data into objects after selecting the desired data.
+
