@@ -1,2 +1,12 @@
 # employee_webapp
-For testing
+For creating the webAPI using .NET
+
+```bash
+$ dotnet new webapi -o api
+```
+
+For running the .NET web application.
+
+```bash
+$ dotnet watch run
+```
