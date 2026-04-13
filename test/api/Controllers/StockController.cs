@@ -19,6 +19,13 @@ namespace api.Controllers
             _context = context;
         }
 
+        [HttpGet("stocks Only")]
+        public async Task<IActionResult> GetAllStocks()
+        {
+            var stocks = await _stockRepo.GetAllStocksAsync();
+            return Ok(stocks);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
