@@ -1,0 +1,100 @@
+.temperature-card {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 28px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.13);
+}
+
+.card-topline {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  border-radius: 999px;
+  background: #f59e0b;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12);
+}
+
+.status-dot.live {
+  background: #14b8a6;
+  box-shadow: 0 0 0 6px rgba(20, 184, 166, 0.14);
+}
+
+.gauge {
+  width: 230px;
+  height: 230px;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
+    conic-gradient(from 220deg, #14b8a6, #f97316, #ef4444, #14b8a6);
+}
+
+.gauge span {
+  color: #0f172a;
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.reading-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+}
+
+.reading-meta div {
+  min-width: 0;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.reading-meta dt {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.reading-meta dd {
+  margin: 6px 0 0;
+  color: #111827;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 420px) {
+  .temperature-card {
+    min-height: 380px;
+    padding: 22px;
+  }
+
+  .gauge {
+    width: 200px;
+    height: 200px;
+  }
+
+  .gauge span {
+    font-size: 2.15rem;
+  }
+
+  .reading-meta {
+    grid-template-columns: 1fr;
+  }
+}
