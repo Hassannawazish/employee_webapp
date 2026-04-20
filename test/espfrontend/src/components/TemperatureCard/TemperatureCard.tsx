@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getLatestTemperature, TemperatureReading } from '../../api';
+import { subscribeToTemperature, TemperatureReading } from '../../api';
 import './TemperatureCard.css';
-
-const refreshMs = 5000;
 
 function formatTime(value?: string) {
   if (!value) {
@@ -18,39 +16,20 @@ function formatTime(value?: string) {
 
 function TemperatureCard() {
   const [reading, setReading] = useState<TemperatureReading | null>(null);
-  const [status, setStatus] = useState('Connecting to API...');
-  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState('Connecting to MQTT...');
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadTemperature() {
-      try {
-        const latestReading = await getLatestTemperature();
-
-        if (!isMounted) {
-          return;
-        }
-
+    const subscription = subscribeToTemperature(
+      (latestReading) => {
         setReading(latestReading);
-        setStatus('Live');
-      } catch (error) {
-        if (isMounted) {
-          setStatus(error instanceof Error ? error.message : 'Unable to read temperature.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+      },
+      (nextStatus) => {
+        setStatus(nextStatus);
       }
-    }
-
-    loadTemperature();
-    const intervalId = window.setInterval(loadTemperature, refreshMs);
+    );
 
     return () => {
-      isMounted = false;
-      window.clearInterval(intervalId);
+      subscription.close();
     };
   }, []);
 
@@ -60,7 +39,7 @@ function TemperatureCard() {
     <article className="temperature-card">
       <div className="card-topline">
         <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
-        <span>{isLoading ? 'Loading' : status}</span>
+        <span>{status}</span>
       </div>
 
       <div className="gauge" aria-label={`Current ESP32 internal temperature ${temperature}`}>

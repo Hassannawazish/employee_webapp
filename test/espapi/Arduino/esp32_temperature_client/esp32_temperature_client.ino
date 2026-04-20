@@ -1,12 +1,24 @@
 #include <WiFi.h>
-#include <WebServer.h>
+#include <WiFiClientSecure.h>
+#include <PubSubClient.h>
 #include <time.h>
 
 const char* ssid = "Bbox-5BDE03F7-Plus";
 const char* password = "*ZqWza9tYCqwwUkXHV";
 const char* deviceId = "esp32-office";
 
-WebServer server(80);
+const char* mqttServer = "add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud";
+const int mqttPort = 8883;
+const char* mqttTopic = "hassa/esp32-office/temperature";
+const char* mqttClientId = "esp32-office-temperature-publisher";
+const char* mqttUsername = "hassan";
+const char* mqttPassword = "Hassan12345#";
+
+WiFiClientSecure wifiClient;
+PubSubClient mqttClient(wifiClient);
+
+unsigned long lastPublishAt = 0;
+const unsigned long publishIntervalMs = 5000;
 
 String isoUtcNow() {
   struct tm timeInfo;
@@ -18,48 +30,6 @@ String isoUtcNow() {
   char buffer[25];
   strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%SZ", &timeInfo);
   return String(buffer);
-}
-
-void addCorsHeaders() {
-  server.sendHeader("Access-Control-Allow-Origin", "*");
-  server.sendHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
-}
-
-void handleOptions() {
-  addCorsHeaders();
-  server.send(204);
-}
-
-void handleRoot() {
-  addCorsHeaders();
-  server.send(
-    200,
-    "application/json",
-    "{\"message\":\"ESP32 temperature server is running.\",\"endpoint\":\"/api/temperature/latest\"}"
-  );
-}
-
-void handleLatestTemperature() {
-  float temperatureC = temperatureRead();
-
-  if (isnan(temperatureC)) {
-    addCorsHeaders();
-    server.send(500, "application/json", "{\"message\":\"Failed to read ESP32 internal temperature.\"}");
-    return;
-  }
-
-  String payload = "{";
-  payload += "\"temperatureC\":";
-  payload += String(temperatureC, 2);
-  payload += ",\"deviceId\":\"";
-  payload += deviceId;
-  payload += "\",\"recordedAtUtc\":\"";
-  payload += isoUtcNow();
-  payload += "\"}";
-
-  addCorsHeaders();
-  server.send(200, "application/json", payload);
 }
 
 void connectToWifi() {
@@ -77,17 +47,48 @@ void connectToWifi() {
   Serial.println(WiFi.localIP());
 }
 
-void setupRoutes() {
-  server.on("/", HTTP_GET, handleRoot);
-  server.on("/api/temperature/latest", HTTP_GET, handleLatestTemperature);
-  server.on("/api/temperature/latest", HTTP_OPTIONS, handleOptions);
+void connectToMqtt() {
+  while (!mqttClient.connected()) {
+    Serial.print("Connecting to MQTT broker...");
 
-  server.begin();
-  Serial.println("HTTP server started.");
-  Serial.println("Open this endpoint from your app:");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/api/temperature/latest");
+    if (mqttClient.connect(mqttClientId, mqttUsername, mqttPassword)) {
+      Serial.println("connected.");
+      Serial.print("Publishing topic: ");
+      Serial.println(mqttTopic);
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(mqttClient.state());
+      Serial.println(". Retrying in 5 seconds.");
+      delay(5000);
+    }
+  }
+}
+
+void publishTemperature() {
+  float temperatureC = temperatureRead();
+
+  if (isnan(temperatureC)) {
+    Serial.println("Failed to read ESP32 internal temperature.");
+    return;
+  }
+
+  String payload = "{";
+  payload += "\"temperatureC\":";
+  payload += String(temperatureC, 2);
+  payload += ",\"deviceId\":\"";
+  payload += deviceId;
+  payload += "\",\"recordedAtUtc\":\"";
+  payload += isoUtcNow();
+  payload += "\"}";
+
+  bool published = mqttClient.publish(mqttTopic, payload.c_str(), true);
+
+  if (published) {
+    Serial.print("Published: ");
+    Serial.println(payload);
+  } else {
+    Serial.println("Failed to publish temperature.");
+  }
 }
 
 void setup() {
@@ -95,7 +96,8 @@ void setup() {
   connectToWifi();
 
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-  setupRoutes();
+  wifiClient.setInsecure();
+  mqttClient.setServer(mqttServer, mqttPort);
 }
 
 void loop() {
@@ -103,5 +105,14 @@ void loop() {
     connectToWifi();
   }
 
-  server.handleClient();
+  if (!mqttClient.connected()) {
+    connectToMqtt();
+  }
+
+  mqttClient.loop();
+
+  if (millis() - lastPublishAt >= publishIntervalMs) {
+    lastPublishAt = millis();
+    publishTemperature();
+  }
 }
