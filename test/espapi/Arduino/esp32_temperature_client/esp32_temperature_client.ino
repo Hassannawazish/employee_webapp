@@ -1,5 +1,4 @@
 #include <WiFi.h>
-#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <time.h>
 
@@ -7,14 +6,15 @@ const char* ssid = "Bbox-5BDE03F7-Plus";
 const char* password = "*ZqWza9tYCqwwUkXHV";
 const char* deviceId = "esp32-office";
 
-const char* mqttServer = "add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud";
-const int mqttPort = 8883;
+// Use the LAN IP address of the computer/Raspberry Pi running Mosquitto.
+const char* mqttServer = "192.168.1.82";
+const int mqttPort = 1884;
 const char* mqttTopic = "hassa/esp32-office/temperature";
 const char* mqttClientId = "esp32-office-temperature-publisher";
-const char* mqttUsername = "hassan";
-const char* mqttPassword = "Hassan12345#";
+const char* mqttUsername = "esp32";
+const char* mqttPassword = "CHANGE_ME_MQTT_PASSWORD";
 
-WiFiClientSecure wifiClient;
+WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
 unsigned long lastPublishAt = 0;
@@ -96,7 +96,6 @@ void setup() {
   connectToWifi();
 
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-  wifiClient.setInsecure();
   mqttClient.setServer(mqttServer, mqttPort);
 }
 

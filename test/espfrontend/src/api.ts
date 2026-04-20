@@ -11,9 +11,7 @@ export type TemperatureSubscription = {
   close: () => void;
 };
 
-const mqttUrl =
-  process.env.REACT_APP_MQTT_URL ??
-  'wss://add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud:8884/mqtt';
+const mqttUrl = process.env.REACT_APP_MQTT_URL ?? 'ws://localhost:9002';
 const mqttTopic = process.env.REACT_APP_MQTT_TOPIC ?? 'hassa/esp32-office/temperature';
 const mqttUsername = process.env.REACT_APP_MQTT_USERNAME;
 const mqttPassword = process.env.REACT_APP_MQTT_PASSWORD;

@@ -1,41 +1,113 @@
 # ESP32-CAM MQTT Temperature Publisher
 
-This Arduino sketch reads the ESP32-CAM internal chip temperature and publishes it to HiveMQ Cloud over MQTT.
+This Arduino sketch reads the ESP32-CAM internal chip temperature and publishes it to a free self-hosted Mosquitto MQTT broker.
 
-## Workflow
-
-```text
-ESP32-CAM -> Wi-Fi -> HiveMQ Cloud -> React frontend
-```
-
-No local ASP.NET backend is required for the MQTT workflow.
-
-## MQTT Settings
+## Current Workflow
 
 ```text
-Broker: add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud
-MQTT TLS port: 8883
-WebSocket TLS port: 8884
-WebSocket URL: wss://add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud:8884/mqtt
-Topic: hassa/esp32-office/temperature
-Username: hassan
+ESP32-CAM -> Wi-Fi -> Mosquitto on your PC -> React frontend
 ```
 
-The sketch publishes this JSON every 5 seconds:
+No cloud MQTT service is required.
 
-```json
-{
-  "temperatureC": 42.15,
-  "deviceId": "esp32-office",
-  "recordedAtUtc": "2026-04-20T09:50:00Z"
-}
+## Ports
+
+This project uses non-default local development ports so it does not fight with the Mosquitto Windows service:
+
+```text
+1884: raw MQTT for ESP32-CAM
+9002: MQTT over WebSocket for React/browser clients
 ```
+
+The topic is:
+
+```text
+hassa/esp32-office/temperature
+```
+
+## Install Mosquitto on Windows
+
+Mosquitto has already been installed on this machine with `winget`:
+
+```powershell
+winget install --id EclipseFoundation.Mosquitto -e --accept-package-agreements --accept-source-agreements
+```
+
+If you need to install it again on another Windows machine, run the same command or download it from:
+
+```text
+https://mosquitto.org/download/
+```
+
+The installed files are usually here:
+
+```text
+C:\Program Files\mosquitto
+```
+
+## Mosquitto Config
+
+Use the project config:
+
+```text
+test/mosquitto/mosquitto-dev.conf
+```
+
+Its contents are:
+
+```text
+allow_anonymous true
+
+listener 1884 0.0.0.0
+
+listener 9002 0.0.0.0
+protocol websockets
+```
+
+## Run Mosquitto
+
+Open a dedicated PowerShell window and leave it open:
+
+```powershell
+& "C:\Program Files\mosquitto\mosquitto.exe" -c "C:\Users\hassa\Desktop\employee_webapp\test\mosquitto\mosquitto-dev.conf" -v
+```
+
+You should see:
+
+```text
+Opening ipv4 listen socket on port 1884.
+Opening ipv4 listen socket on port 9002.
+mosquitto version 2.1.2 running
+```
+
+## Find Your PC LAN IP
+
+In PowerShell:
+
+```powershell
+ipconfig
+```
+
+Look for the Wi-Fi IPv4 address. On this machine it was:
+
+```text
+192.168.1.82
+```
+
+The Arduino sketch currently uses:
+
+```cpp
+const char* mqttServer = "192.168.1.82";
+const int mqttPort = 1884;
+```
+
+If your PC IP changes, update `mqttServer`.
 
 ## Arduino Setup
 
 1. Open Arduino IDE.
-2. Install the ESP32 board package if it is not already installed.
-3. Install this library:
+2. Install the ESP32 board package if needed.
+3. Install this Arduino library:
 
 ```text
 PubSubClient by Nick O'Leary
@@ -53,23 +125,23 @@ Sketch -> Include Library -> Manage Libraries -> search PubSubClient -> Install
 test/espapi/Arduino/esp32_temperature_client/esp32_temperature_client.ino
 ```
 
-5. Confirm these values in the sketch:
+5. Confirm Wi-Fi and broker values:
 
 ```cpp
 const char* ssid = "Bbox-5BDE03F7-Plus";
 const char* password = "YOUR_WIFI_PASSWORD";
-const char* mqttUsername = "hassan";
-const char* mqttPassword = "YOUR_HIVEMQ_PASSWORD";
+const char* mqttServer = "192.168.1.82";
+const int mqttPort = 1884;
 ```
 
-6. Select your ESP32-CAM board and upload the sketch.
+6. Upload the sketch to the ESP32-CAM.
 7. Open Serial Monitor at:
 
 ```text
 115200 baud
 ```
 
-You should see:
+Expected output:
 
 ```text
 Connecting to WiFi...
@@ -79,24 +151,51 @@ Publishing topic: hassa/esp32-office/temperature
 Published: {"temperatureC":...}
 ```
 
-If you see `Published`, the ESP32-CAM is sending data to HiveMQ Cloud.
+The sketch publishes JSON every 5 seconds:
 
-## Test MQTT Without React
-
-Use HiveMQ's WebSocket client or your HiveMQ Cloud dashboard client.
-
-Connection details:
-
-```text
-Host: add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud
-Port: 8884
-Path: /mqtt
-Username: hassan
-Password: your HiveMQ password
-Topic: hassa/esp32-office/temperature
+```json
+{
+  "temperatureC": 42.15,
+  "deviceId": "esp32-office",
+  "recordedAtUtc": "2026-04-20T09:50:00Z"
+}
 ```
 
-Subscribe to the topic. You should receive a new JSON message about every 5 seconds.
+## Test Without React
+
+Open another PowerShell window:
+
+```powershell
+cd "C:\Program Files\mosquitto"
+.\mosquitto_sub.exe -h localhost -p 1884 -t hassa/esp32-office/temperature -v
+```
+
+If ESP32-CAM is publishing, you should see JSON messages every 5 seconds.
+
+## Local vs Global
+
+This setup is local by default:
+
+```text
+ESP32-CAM -> your PC broker -> React on your PC/local network
+```
+
+To view data globally for free, use a private network tool such as Tailscale or ZeroTier.
+
+Recommended free global option:
+
+```text
+Tailscale
+```
+
+With Tailscale:
+
+```text
+ESP32-CAM publishes to your PC on home Wi-Fi
+Your remote phone/laptop connects to your PC broker using the PC's Tailscale IP
+```
+
+Do not expose anonymous Mosquitto directly to the public internet.
 
 ## Troubleshooting
 
@@ -106,30 +205,11 @@ If Serial Monitor shows:
 failed, rc=-2
 ```
 
-The ESP32-CAM could not connect to the broker. Check Wi-Fi internet access, broker URL, port `8883`, and power stability.
+The ESP32-CAM cannot reach Mosquitto. Check:
 
-If Serial Monitor shows:
+- Mosquitto is running
+- `mqttServer` is your PC LAN IP
+- Port `1884` is allowed through Windows Firewall
+- ESP32-CAM and PC are on the same Wi-Fi
 
-```text
-failed, rc=4
-```
-
-The MQTT username or password is wrong.
-
-If Serial Monitor shows:
-
-```text
-failed, rc=5
-```
-
-The MQTT account is not authorized. Check HiveMQ Cloud credentials and permissions.
-
-## Security Note
-
-The sketch currently uses:
-
-```cpp
-wifiClient.setInsecure();
-```
-
-This is convenient for testing TLS. For production, replace it with the HiveMQ Cloud CA certificate.
+If `mosquitto_sub` receives messages but React does not, check the frontend WebSocket URL and topic.

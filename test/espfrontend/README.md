@@ -1,44 +1,98 @@
 # ESP Temperature Frontend
 
-React app that subscribes to HiveMQ Cloud over MQTT WebSocket and displays the latest ESP32-CAM internal chip temperature.
+React app that subscribes to your free self-hosted Mosquitto broker and displays the latest ESP32-CAM internal chip temperature.
 
-## Workflow
+## Current Workflow
 
 ```text
-ESP32-CAM -> HiveMQ Cloud MQTT topic -> React frontend
+ESP32-CAM -> Mosquitto on your PC -> React frontend
 ```
 
-No local backend is required.
+No paid MQTT service is required.
 
-## MQTT Settings
+## Current MQTT Settings
 
 ```text
-WebSocket URL: wss://add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud:8884/mqtt
+Broker machine: your Windows PC
+Raw MQTT URL for ESP32: 192.168.1.82:1884
+WebSocket URL for React: ws://localhost:9002
 Topic: hassa/esp32-office/temperature
-Username: hassan
+Username/password: none for local testing
 ```
 
-These settings must match the Arduino sketch.
+Browsers cannot connect to raw MQTT port `1884`, so the React app uses Mosquitto's WebSocket listener on port `9002`.
 
-## Run Everything
+## Step 1: Run Mosquitto
 
-First, upload and start the ESP32-CAM sketch:
+Mosquitto is installed at:
+
+```text
+C:\Program Files\mosquitto
+```
+
+The project config is:
+
+```text
+C:\Users\hassa\Desktop\employee_webapp\test\mosquitto\mosquitto-dev.conf
+```
+
+Open a dedicated PowerShell window and keep it open:
+
+```powershell
+& "C:\Program Files\mosquitto\mosquitto.exe" -c "C:\Users\hassa\Desktop\employee_webapp\test\mosquitto\mosquitto-dev.conf" -v
+```
+
+Expected output:
+
+```text
+Opening ipv4 listen socket on port 1884.
+Opening ipv4 listen socket on port 9002.
+mosquitto version 2.1.2 running
+```
+
+## Step 2: Upload ESP32-CAM Sketch
+
+Open:
 
 ```text
 test/espapi/Arduino/esp32_temperature_client/esp32_temperature_client.ino
 ```
 
-Open Serial Monitor at `115200` baud and confirm it prints `Published:`.
+Confirm the broker IP and port:
 
-Then run the frontend:
+```cpp
+const char* mqttServer = "192.168.1.82";
+const int mqttPort = 1884;
+```
+
+Upload the sketch. Open Serial Monitor at `115200` baud and wait for:
+
+```text
+Published:
+```
+
+## Step 3: Test MQTT Before React
+
+Open another PowerShell window:
+
+```powershell
+cd "C:\Program Files\mosquitto"
+.\mosquitto_sub.exe -h localhost -p 1884 -t hassa/esp32-office/temperature -v
+```
+
+Expected messages:
+
+```json
+hassa/esp32-office/temperature {"temperatureC":42.15,"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z"}
+```
+
+## Step 4: Run React Frontend
+
+Open another PowerShell window:
 
 ```powershell
 cd C:\Users\hassa\Desktop\employee_webapp\test\espfrontend
 npm.cmd install
-$env:REACT_APP_MQTT_URL="wss://add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud:8884/mqtt"
-$env:REACT_APP_MQTT_TOPIC="hassa/esp32-office/temperature"
-$env:REACT_APP_MQTT_USERNAME="hassan"
-$env:REACT_APP_MQTT_PASSWORD="YOUR_HIVEMQ_PASSWORD"
 npm.cmd start
 ```
 
@@ -48,7 +102,7 @@ Open:
 http://localhost:3000
 ```
 
-Expected frontend status flow:
+Expected status flow:
 
 ```text
 Connecting to MQTT...
@@ -57,31 +111,65 @@ Waiting for ESP32 reading...
 Live
 ```
 
-When the status is `Live`, the card is receiving MQTT data.
+When the status is `Live`, React is receiving MQTT data.
 
-## Global Viewing
+## Run Frontend from Another Device on Your Wi-Fi
 
-HiveMQ Cloud makes the data globally reachable. Any device with internet access can view the data if it connects to the same MQTT broker, topic, username, and password.
+If the browser is on another device, `localhost` will not point to your broker PC. Use your PC IP instead:
 
-For quick global testing, use a WebSocket MQTT client with:
-
-```text
-Host: add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud
-Port: 8884
-Path: /mqtt
-Topic: hassa/esp32-office/temperature
-Username: hassan
-Password: your HiveMQ password
+```powershell
+$env:REACT_APP_MQTT_URL="ws://192.168.1.82:9002"
+$env:REACT_APP_MQTT_TOPIC="hassa/esp32-office/temperature"
+npm.cmd start
 ```
 
-For a public dashboard, deploy this React app to a host such as Vercel, Netlify, Firebase Hosting, or GitHub Pages and set these environment variables in the hosting dashboard:
+## Make It Global for Free
+
+The current setup is local. To view data globally without paying for a cloud MQTT broker, use Tailscale or ZeroTier.
+
+### Recommended: Tailscale
+
+1. Install Tailscale on your broker PC:
 
 ```text
-REACT_APP_MQTT_URL=wss://add4b2d9bd574f0f9748031fdf440bd1.s1.eu.hivemq.cloud:8884/mqtt
-REACT_APP_MQTT_TOPIC=hassa/esp32-office/temperature
-REACT_APP_MQTT_USERNAME=hassan
-REACT_APP_MQTT_PASSWORD=your HiveMQ password
+https://tailscale.com/download/windows
 ```
+
+2. Install Tailscale on your phone or remote laptop.
+3. Login with the same Tailscale account.
+4. Find your PC's Tailscale IP. It usually starts with:
+
+```text
+100.x.x.x
+```
+
+5. From a remote device, use:
+
+```text
+ws://100.x.x.x:9002
+```
+
+For a React app running on a remote computer:
+
+```powershell
+$env:REACT_APP_MQTT_URL="ws://100.x.x.x:9002"
+$env:REACT_APP_MQTT_TOPIC="hassa/esp32-office/temperature"
+npm.cmd start
+```
+
+This is global but private. Only your Tailscale devices can access the broker.
+
+### Not Recommended: Public Port Forwarding
+
+You can expose Mosquitto through your router, but do not expose the current anonymous config to the internet.
+
+Before using port forwarding, add:
+
+- Mosquitto username/password
+- TLS or a secure reverse proxy
+- Firewall restrictions
+
+Anonymous public MQTT is unsafe.
 
 ## Verify Frontend
 
@@ -93,18 +181,21 @@ npm.cmd test -- --watchAll=false --runInBand
 
 ## Troubleshooting
 
-If the frontend stays on `Waiting for ESP32 reading...`, React is connected to MQTT but no ESP32 message has arrived yet. Check the Arduino Serial Monitor for `Published:`.
+If the frontend shows `MQTT connection error.`, check:
 
-If the frontend shows `MQTT connection error.`, check the WebSocket URL, username, and password.
+- Mosquitto is running
+- WebSocket listener `9002` is enabled
+- React is using `ws://localhost:9002` on the broker PC
 
-If the frontend works locally but not after deployment, confirm the deployed app has the same `REACT_APP_...` environment variables and rebuild the deployment.
+If the frontend stays on `Waiting for ESP32 reading...`, React connected to Mosquitto but no ESP32 message arrived. Check:
 
-## Security Note
+- Arduino Serial Monitor for `Published:`
+- `mosquitto_sub` output
+- Topic spelling: `hassa/esp32-office/temperature`
 
-For a test project, putting MQTT credentials in the frontend is okay. For production, browser JavaScript exposes these credentials. A safer production architecture is:
+If ESP32 shows `failed, rc=-2`, it cannot reach Mosquitto. Check:
 
-```text
-ESP32-CAM -> HiveMQ Cloud -> backend server -> public frontend
-```
-
-The backend keeps MQTT credentials secret.
+- PC IP in Arduino sketch
+- Windows Firewall
+- Mosquitto listener `1884`
+- Same Wi-Fi network
