@@ -11,6 +11,17 @@
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.13);
 }
 
+.temperature-card.rain-card .status-dot.live {
+  background: #6366f1;
+  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.14);
+}
+
+.temperature-card.rain-card .gauge {
+  background:
+    radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
+    conic-gradient(from 220deg, #2563eb, #06b6d4, #22c55e, #2563eb);
+}
+
 .card-topline {
   min-height: 24px;
   display: inline-flex;
@@ -50,6 +61,8 @@
   color: #0f172a;
   font-size: 2.5rem;
   font-weight: 800;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .reading-meta {
@@ -57,6 +70,10 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin: 0;
+}
+
+.temperature-card.rain-card .reading-meta {
+  grid-template-columns: 1fr 1fr;
 }
 
 .reading-meta div {

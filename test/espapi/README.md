@@ -1,6 +1,6 @@
-# ESP32-CAM MQTT Temperature Publisher
+# ESP32-CAM MQTT Sensor Publisher
 
-This Arduino sketch reads the ESP32-CAM internal chip temperature and publishes it to a free self-hosted Mosquitto MQTT broker.
+This Arduino sketch reads the ESP32 internal temperature sensor and a digital rain / water sensor, then publishes both readings to a self-hosted Mosquitto MQTT broker.
 
 ## Current Workflow
 
@@ -9,6 +9,13 @@ ESP32-CAM -> Wi-Fi -> Mosquitto on your PC -> React frontend
 ```
 
 No cloud MQTT service is required.
+
+## Published Topics
+
+```text
+hassa/esp32-office/temperature
+hassa/esp32-office/rain
+```
 
 ## Ports
 
@@ -19,11 +26,26 @@ This project uses non-default local development ports so it does not fight with 
 9002: MQTT over WebSocket for React/browser clients
 ```
 
-The topic is:
+## Sensor Behavior
 
-```text
-hassa/esp32-office/temperature
+The sketch publishes every 5 seconds:
+
+- Temperature JSON from the ESP32 internal sensor
+- Rain sensor JSON from the external module connected to a GPIO pin
+
+Current rain sensor settings in the sketch:
+
+```cpp
+const int rainSensorPin = 13;
+const bool rainDetectedStateIsLow = true;
 ```
+
+This means:
+
+- The rain sensor module is connected to GPIO `13`
+- Water is considered detected when the sensor output reads `LOW`
+
+If your rain module behaves the opposite way, change `rainDetectedStateIsLow` to `false`.
 
 ## Install Mosquitto on Windows
 
@@ -53,7 +75,7 @@ Use the project config:
 test/mosquitto/mosquitto-dev.conf
 ```
 
-Its contents are:
+Typical contents:
 
 ```text
 allow_anonymous true
@@ -62,6 +84,13 @@ listener 1884 0.0.0.0
 
 listener 9002 0.0.0.0
 protocol websockets
+```
+
+If you enable MQTT authentication on the broker, make sure the sketch credentials match:
+
+```cpp
+const char* mqttUsername = "esp32";
+const char* mqttPassword = "CHANGE_ME_MQTT_PASSWORD";
 ```
 
 ## Run Mosquitto
@@ -125,17 +154,22 @@ Sketch -> Include Library -> Manage Libraries -> search PubSubClient -> Install
 test/espapi/Arduino/esp32_temperature_client/esp32_temperature_client.ino
 ```
 
-5. Confirm Wi-Fi and broker values:
+5. Confirm Wi-Fi, broker, and sensor values:
 
 ```cpp
-const char* ssid = "Bbox-5BDE03F7-Plus";
+const char* ssid = "YOUR_WIFI_NAME";
 const char* password = "YOUR_WIFI_PASSWORD";
 const char* mqttServer = "192.168.1.82";
 const int mqttPort = 1884;
+const char* temperatureTopic = "hassa/esp32-office/temperature";
+const char* rainTopic = "hassa/esp32-office/rain";
+const int rainSensorPin = 13;
+const bool rainDetectedStateIsLow = true;
 ```
 
-6. Upload the sketch to the ESP32-CAM.
-7. Open Serial Monitor at:
+6. Wire the rain sensor module digital output `D0` to the configured ESP32 GPIO pin and connect power/ground.
+7. Upload the sketch to the ESP32-CAM.
+8. Open Serial Monitor at:
 
 ```text
 115200 baud
@@ -147,19 +181,37 @@ Expected output:
 Connecting to WiFi...
 Connected. ESP32 IP: ...
 Connecting to MQTT broker...connected.
-Publishing topic: hassa/esp32-office/temperature
-Published: {"temperatureC":...}
+Publishing temperature topic: hassa/esp32-office/temperature
+Publishing rain topic: hassa/esp32-office/rain
+Published temperature: {"deviceId":"esp32-office","recordedAtUtc":"...","temperatureC":...}
+Published rain sensor: {"deviceId":"esp32-office","recordedAtUtc":"...","rainDetected":true,"digitalState":0,"pin":13}
 ```
 
-The sketch publishes JSON every 5 seconds:
+## Published Payloads
+
+Temperature payload:
 
 ```json
 {
-  "temperatureC": 42.15,
   "deviceId": "esp32-office",
-  "recordedAtUtc": "2026-04-20T09:50:00Z"
+  "recordedAtUtc": "2026-04-20T09:50:00Z",
+  "temperatureC": 42.15
 }
 ```
+
+Rain payload:
+
+```json
+{
+  "deviceId": "esp32-office",
+  "recordedAtUtc": "2026-04-20T09:50:00Z",
+  "rainDetected": true,
+  "digitalState": 0,
+  "pin": 13
+}
+```
+
+`digitalState` is the raw GPIO reading from the rain sensor module.
 
 ## Test Without React
 
@@ -170,7 +222,14 @@ cd "C:\Program Files\mosquitto"
 .\mosquitto_sub.exe -h localhost -p 1884 -t hassa/esp32-office/temperature -v
 ```
 
-If ESP32-CAM is publishing, you should see JSON messages every 5 seconds.
+To subscribe to both sensor topics:
+
+```powershell
+cd "C:\Program Files\mosquitto"
+.\mosquitto_sub.exe -h localhost -p 1884 -t hassa/esp32-office/# -v
+```
+
+If the ESP32-CAM is publishing, you should see temperature and rain JSON messages every 5 seconds.
 
 ## Local vs Global
 
@@ -181,19 +240,6 @@ ESP32-CAM -> your PC broker -> React on your PC/local network
 ```
 
 To view data globally for free, use a private network tool such as Tailscale or ZeroTier.
-
-Recommended free global option:
-
-```text
-Tailscale
-```
-
-With Tailscale:
-
-```text
-ESP32-CAM publishes to your PC on home Wi-Fi
-Your remote phone/laptop connects to your PC broker using the PC's Tailscale IP
-```
 
 Do not expose anonymous Mosquitto directly to the public internet.
 
@@ -211,5 +257,17 @@ The ESP32-CAM cannot reach Mosquitto. Check:
 - `mqttServer` is your PC LAN IP
 - Port `1884` is allowed through Windows Firewall
 - ESP32-CAM and PC are on the same Wi-Fi
+- MQTT username/password match the broker configuration
 
-If `mosquitto_sub` receives messages but React does not, check the frontend WebSocket URL and topic.
+If rain messages are published but the sensor state is inverted, flip:
+
+```cpp
+const bool rainDetectedStateIsLow = true;
+```
+
+If the rain payload never changes, check:
+
+- Rain sensor wiring
+- The selected GPIO pin
+- Whether your module is using the digital `D0` output
+- Whether the sensor board threshold potentiometer needs adjustment
