@@ -1,20 +1,28 @@
 import './App.css';
+import LedControlCard from './components/LedControlCard/LedControlCard';
+import RainCard from './components/RainCard/RainCard';
 import TemperatureCard from './components/TemperatureCard/TemperatureCard';
 
 function App() {
   return (
     <main className="app-shell">
-      <section className="monitor-layout" aria-label="ESP32 temperature monitor">
+      <section className="monitor-layout" aria-label="ESP32 sensor monitor">
         <div className="monitor-copy">
           <p className="eyebrow">ESP32 live sensor</p>
-          <h1>Internal Temperature Monitor</h1>
+          <h1>ESP32 Sensor Monitor</h1>
           <p className="lede">
-            The card refreshes automatically from your ASP.NET Core API and displays
-            the latest chip temperature sent by the ESP32.
+            The cards subscribe to MQTT topics and display the latest internal
+            temperature and rain sensor readings published by the ESP32 while
+            letting you send `true` and `false` LED commands back to the
+            board.
           </p>
         </div>
 
-        <TemperatureCard />
+        <div className="sensor-grid">
+          <TemperatureCard />
+          <RainCard />
+          <LedControlCard />
+        </div>
       </section>
     </main>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { subscribeToTemperature, TemperatureReading } from '../../api';
-import './TemperatureCard.css';
+import { RainReading, subscribeToRainSensor } from '../../api';
+import '../TemperatureCard/TemperatureCard.css';
 
 function formatTime(value?: string) {
   if (!value) {
@@ -14,12 +14,12 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function TemperatureCard() {
-  const [reading, setReading] = useState<TemperatureReading | null>(null);
+function RainCard() {
+  const [reading, setReading] = useState<RainReading | null>(null);
   const [status, setStatus] = useState('Connecting to MQTT...');
 
   useEffect(() => {
-    const subscription = subscribeToTemperature(
+    const subscription = subscribeToRainSensor(
       (latestReading) => {
         setReading(latestReading);
       },
@@ -33,23 +33,32 @@ function TemperatureCard() {
     };
   }, []);
 
-  const temperature = reading ? `${reading.temperatureC.toFixed(1)} C` : '--.- C';
+  const rainState = reading ? (reading.rainDetected ? 'Wet' : 'Dry') : '--';
+  const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
-    <article className="temperature-card">
+    <article className="temperature-card rain-card">
       <div className="card-topline">
         <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current ESP32 internal temperature ${temperature}`}>
-        <span>{temperature}</span>
+      <div className="gauge" aria-label={`Current rain sensor state ${rainState}`}>
+        <span>{rainState}</span>
       </div>
 
       <dl className="reading-meta">
         <div>
-          <dt>Device</dt>
-          <dd>{reading?.deviceId ?? 'ESP32'}</dd>
+          <dt>GPIO Pin</dt>
+          <dd>{reading?.pin ?? '--'}</dd>
+        </div>
+        <div>
+          <dt>Digital State</dt>
+          <dd>{digitalState}</dd>
+        </div>
+        <div>
+          <dt>Sensor</dt>
+          <dd>Rain / water</dd>
         </div>
         <div>
           <dt>Updated</dt>
@@ -60,4 +69,4 @@ function TemperatureCard() {
   );
 }
 
-export default TemperatureCard;
+export default RainCard;
