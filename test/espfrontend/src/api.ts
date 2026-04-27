@@ -15,6 +15,14 @@ export type RainReading = {
   recordedAtUtc: string;
 };
 
+export type LedState = {
+  enabled: boolean;
+  pin: number;
+  deviceId: string;
+  recordedAtUtc: string;
+  source?: string;
+};
+
 export type TemperatureSubscription = {
   close: () => void;
 };
@@ -25,6 +33,10 @@ const temperatureTopic =
   process.env.REACT_APP_MQTT_TOPIC ??
   'hassa/esp32-office/temperature';
 const rainTopic = process.env.REACT_APP_MQTT_RAIN_TOPIC ?? 'hassa/esp32-office/rain';
+const ledCommandTopic =
+  process.env.REACT_APP_MQTT_LED_COMMAND_TOPIC ?? 'hassa/esp32-office/led/command';
+const ledStateTopic =
+  process.env.REACT_APP_MQTT_LED_STATE_TOPIC ?? 'hassa/esp32-office/led/state';
 const mqttUsername = process.env.REACT_APP_MQTT_USERNAME;
 const mqttPassword = process.env.REACT_APP_MQTT_PASSWORD;
 
@@ -117,4 +129,87 @@ export function subscribeToRainSensor(
     onReading,
     onStatus
   );
+}
+
+export function subscribeToLedState(
+  onReading: (reading: LedState) => void,
+  onStatus: (status: string) => void
+): TemperatureSubscription {
+  return subscribeToSensor<LedState>(
+    {
+      topic: ledStateTopic,
+      waitingStatus: 'Waiting for LED state...',
+      invalidPayloadStatus: 'Received invalid LED state payload.'
+    },
+    onReading,
+    onStatus
+  );
+}
+
+export function publishLedCommand(enabled: boolean): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const clientId = `espfrontend-led-publisher-${Math.random().toString(16).slice(2)}`;
+    const client: MqttClient = mqtt.connect(mqttUrl, {
+      clientId,
+      clean: true,
+      connectTimeout: 8000,
+      reconnectPeriod: 0,
+      username: mqttUsername,
+      password: mqttPassword
+    });
+    let settled = false;
+
+    const closeWithError = (message: string) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      client.end(false, () => {
+        reject(new Error(message));
+      });
+    };
+
+    const closeAfterSuccess = () => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      client.end(false, () => {
+        resolve();
+      });
+    };
+
+    client.on('connect', () => {
+      client.publish(
+        ledCommandTopic,
+        enabled ? 'true' : 'false',
+        { qos: 1, retain: true },
+        (error?: Error | null) => {
+          if (error) {
+            closeWithError(error.message);
+          } else {
+            closeAfterSuccess();
+          }
+        }
+      );
+    });
+
+    client.on('error', (error) => {
+      const message = error instanceof Error ? error.message : 'MQTT connection error.';
+      closeWithError(message);
+    });
+
+    client.on('offline', () => {
+      closeWithError('MQTT connection is offline.');
+    });
+
+    client.on('close', () => {
+      if (!settled) {
+        settled = true;
+        reject(new Error('MQTT connection closed before the LED command was sent.'));
+      }
+    });
+  });
 }

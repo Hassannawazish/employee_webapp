@@ -14,6 +14,7 @@ No paid MQTT service is required.
 
 - Temperature card: latest internal ESP32 temperature reading
 - Rain card: latest digital rain / water sensor state
+- LED card: sends `true` / `false` MQTT commands and shows the last applied LED state
 
 The rain card displays:
 
@@ -30,6 +31,8 @@ Raw MQTT URL for ESP32: 192.168.1.82:1884
 WebSocket URL for React: ws://localhost:9002
 Temperature topic: hassa/esp32-office/temperature
 Rain topic: hassa/esp32-office/rain
+LED command topic: hassa/esp32-office/led/command
+LED state topic: hassa/esp32-office/led/state
 Username/password: optional in frontend, supported through env vars
 ```
 
@@ -44,6 +47,8 @@ REACT_APP_MQTT_URL
 REACT_APP_MQTT_TEMPERATURE_TOPIC
 REACT_APP_MQTT_TOPIC
 REACT_APP_MQTT_RAIN_TOPIC
+REACT_APP_MQTT_LED_COMMAND_TOPIC
+REACT_APP_MQTT_LED_STATE_TOPIC
 REACT_APP_MQTT_USERNAME
 REACT_APP_MQTT_PASSWORD
 ```
@@ -104,6 +109,14 @@ const int rainSensorPin = 13;
 const bool rainDetectedStateIsLow = true;
 ```
 
+Confirm the LED topic and pin:
+
+```cpp
+const char* ledCommandTopic = "hassa/esp32-office/led/command";
+const char* ledStateTopic = "hassa/esp32-office/led/state";
+const int ledPin = 14;
+```
+
 Upload the sketch. Open Serial Monitor at `115200` baud and wait for:
 
 ```text
@@ -132,6 +145,7 @@ Expected messages:
 ```json
 hassa/esp32-office/temperature {"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z","temperatureC":42.15}
 hassa/esp32-office/rain {"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z","rainDetected":true,"digitalState":0,"pin":13}
+hassa/esp32-office/led/state {"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z","enabled":true,"pin":14,"source":"mqtt-command"}
 ```
 
 ## Step 4: Run React Frontend
@@ -178,6 +192,8 @@ If the browser is on another device, `localhost` will not point to your broker P
 $env:REACT_APP_MQTT_URL="ws://192.168.1.82:9002"
 $env:REACT_APP_MQTT_TEMPERATURE_TOPIC="hassa/esp32-office/temperature"
 $env:REACT_APP_MQTT_RAIN_TOPIC="hassa/esp32-office/rain"
+$env:REACT_APP_MQTT_LED_COMMAND_TOPIC="hassa/esp32-office/led/command"
+$env:REACT_APP_MQTT_LED_STATE_TOPIC="hassa/esp32-office/led/state"
 npm.cmd start
 ```
 

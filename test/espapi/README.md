@@ -15,6 +15,8 @@ No cloud MQTT service is required.
 ```text
 hassa/esp32-office/temperature
 hassa/esp32-office/rain
+hassa/esp32-office/led/command
+hassa/esp32-office/led/state
 ```
 
 ## Ports
@@ -46,6 +48,19 @@ This means:
 - Water is considered detected when the sensor output reads `LOW`
 
 If your rain module behaves the opposite way, change `rainDetectedStateIsLow` to `false`.
+
+Current LED settings in the sketch:
+
+```cpp
+const int ledPin = 14;
+```
+
+The ESP32 listens for:
+
+- `true` on `hassa/esp32-office/led/command` to turn the LED on
+- `false` on `hassa/esp32-office/led/command` to turn the LED off
+
+After applying the command, it publishes the current LED state to `hassa/esp32-office/led/state`.
 
 ## Install Mosquitto on Windows
 
@@ -163,8 +178,11 @@ const char* mqttServer = "192.168.1.82";
 const int mqttPort = 1884;
 const char* temperatureTopic = "hassa/esp32-office/temperature";
 const char* rainTopic = "hassa/esp32-office/rain";
+const char* ledCommandTopic = "hassa/esp32-office/led/command";
+const char* ledStateTopic = "hassa/esp32-office/led/state";
 const int rainSensorPin = 13;
 const bool rainDetectedStateIsLow = true;
+const int ledPin = 14;
 ```
 
 6. Wire the rain sensor module digital output `D0` to the configured ESP32 GPIO pin and connect power/ground.
@@ -183,8 +201,11 @@ Connected. ESP32 IP: ...
 Connecting to MQTT broker...connected.
 Publishing temperature topic: hassa/esp32-office/temperature
 Publishing rain topic: hassa/esp32-office/rain
+Listening for LED commands on: hassa/esp32-office/led/command
+LED command topic subscription ready.
 Published temperature: {"deviceId":"esp32-office","recordedAtUtc":"...","temperatureC":...}
 Published rain sensor: {"deviceId":"esp32-office","recordedAtUtc":"...","rainDetected":true,"digitalState":0,"pin":13}
+Published LED state: {"deviceId":"esp32-office","recordedAtUtc":"...","enabled":false,"pin":14,"source":"mqtt-command"}
 ```
 
 ## Published Payloads
@@ -212,6 +233,34 @@ Rain payload:
 ```
 
 `digitalState` is the raw GPIO reading from the rain sensor module.
+
+LED state payload:
+
+```json
+{
+  "deviceId": "esp32-office",
+  "recordedAtUtc": "2026-04-20T09:50:00Z",
+  "enabled": true,
+  "pin": 14,
+  "source": "mqtt-command"
+}
+```
+
+## Test LED Command
+
+Open another PowerShell window:
+
+```powershell
+cd "C:\Program Files\mosquitto"
+.\mosquitto_pub.exe -h localhost -p 1884 -u esp32 -P CHANGE_ME_MQTT_PASSWORD -t hassa/esp32-office/led/command -m true
+```
+
+Turn it back off:
+
+```powershell
+cd "C:\Program Files\mosquitto"
+.\mosquitto_pub.exe -h localhost -p 1884 -u esp32 -P CHANGE_ME_MQTT_PASSWORD -t hassa/esp32-office/led/command -m false
+```
 
 ## Test Without React
 

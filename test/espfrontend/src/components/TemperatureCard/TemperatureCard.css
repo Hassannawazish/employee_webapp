@@ -16,10 +16,21 @@
   box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.14);
 }
 
+.temperature-card.led-card .status-dot.live {
+  background: #eab308;
+  box-shadow: 0 0 0 6px rgba(234, 179, 8, 0.18);
+}
+
 .temperature-card.rain-card .gauge {
   background:
     radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
     conic-gradient(from 220deg, #2563eb, #06b6d4, #22c55e, #2563eb);
+}
+
+.temperature-card.led-card .gauge {
+  background:
+    radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
+    conic-gradient(from 220deg, #facc15, #f59e0b, #f97316, #facc15);
 }
 
 .card-topline {
@@ -74,6 +85,50 @@
 
 .temperature-card.rain-card .reading-meta {
   grid-template-columns: 1fr 1fr;
+}
+
+.led-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.led-button {
+  min-height: 48px;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  background: #fefce8;
+  color: #854d0e;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.led-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(234, 179, 8, 0.18);
+}
+
+.led-button.active {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #422006;
+  border-color: transparent;
+}
+
+.led-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.command-status {
+  margin: -8px 0 0;
+  color: #854d0e;
+  font-weight: 700;
 }
 
 .reading-meta div {
