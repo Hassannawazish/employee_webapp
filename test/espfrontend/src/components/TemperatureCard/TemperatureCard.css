@@ -21,6 +21,11 @@
   box-shadow: 0 0 0 6px rgba(234, 179, 8, 0.18);
 }
 
+.temperature-card.gas-card .status-dot.live {
+  background: #ef4444;
+  box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.16);
+}
+
 .temperature-card.rain-card .gauge {
   background:
     radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
@@ -31,6 +36,12 @@
   background:
     radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
     conic-gradient(from 220deg, #facc15, #f59e0b, #f97316, #facc15);
+}
+
+.temperature-card.gas-card .gauge {
+  background:
+    radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
+    conic-gradient(from 220deg, #fb7185, #ef4444, #f97316, #fb7185);
 }
 
 .card-topline {

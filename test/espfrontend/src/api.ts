@@ -15,6 +15,14 @@ export type RainReading = {
   recordedAtUtc: string;
 };
 
+export type GasReading = {
+  gasDetected: boolean;
+  digitalState: number;
+  pin: number;
+  deviceId: string;
+  recordedAtUtc: string;
+};
+
 export type LedState = {
   enabled: boolean;
   pin: number;
@@ -33,6 +41,7 @@ const temperatureTopic =
   process.env.REACT_APP_MQTT_TOPIC ??
   'hassa/esp32-office/temperature';
 const rainTopic = process.env.REACT_APP_MQTT_RAIN_TOPIC ?? 'hassa/esp32-office/rain';
+const gasTopic = process.env.REACT_APP_MQTT_GAS_TOPIC ?? 'hassa/esp32-office/gas';
 const ledCommandTopic =
   process.env.REACT_APP_MQTT_LED_COMMAND_TOPIC ?? 'hassa/esp32-office/led/command';
 const ledStateTopic =
@@ -125,6 +134,21 @@ export function subscribeToRainSensor(
       topic: rainTopic,
       waitingStatus: 'Waiting for rain sensor reading...',
       invalidPayloadStatus: 'Received invalid rain sensor payload.'
+    },
+    onReading,
+    onStatus
+  );
+}
+
+export function subscribeToGasSensor(
+  onReading: (reading: GasReading) => void,
+  onStatus: (status: string) => void
+): TemperatureSubscription {
+  return subscribeToSensor<GasReading>(
+    {
+      topic: gasTopic,
+      waitingStatus: 'Waiting for gas sensor reading...',
+      invalidPayloadStatus: 'Received invalid gas sensor payload.'
     },
     onReading,
     onStatus
