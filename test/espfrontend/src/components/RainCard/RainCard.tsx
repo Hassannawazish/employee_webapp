@@ -4,7 +4,7 @@ import '../TemperatureCard/TemperatureCard.css';
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'Waiting for first reading';
+    return 'En attente de la premiere mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -16,7 +16,7 @@ function formatTime(value?: string) {
 
 function RainCard() {
   const [reading, setReading] = useState<RainReading | null>(null);
-  const [status, setStatus] = useState('Connecting to MQTT...');
+  const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
     const subscription = subscribeToRainSensor(
@@ -33,35 +33,35 @@ function RainCard() {
     };
   }, []);
 
-  const rainState = reading ? (reading.rainDetected ? 'Wet' : 'Dry') : '--';
+  const rainState = reading ? (reading.rainDetected ? 'Humide' : 'Sec') : '--';
   const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
     <article className="temperature-card rain-card">
       <div className="card-topline">
-        <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
+        <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current rain sensor state ${rainState}`}>
+      <div className="gauge" aria-label={`Etat actuel du capteur de pluie ${rainState}`}>
         <span>{rainState}</span>
       </div>
 
       <dl className="reading-meta">
         <div>
-          <dt>GPIO Pin</dt>
+          <dt>Broche GPIO</dt>
           <dd>{reading?.pin ?? '--'}</dd>
         </div>
         <div>
-          <dt>Digital State</dt>
+          <dt>Etat numerique</dt>
           <dd>{digitalState}</dd>
         </div>
         <div>
-          <dt>Sensor</dt>
-          <dd>Rain / water</dd>
+          <dt>Capteur</dt>
+          <dd>Pluie / eau</dd>
         </div>
         <div>
-          <dt>Updated</dt>
+          <dt>Mise a jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>

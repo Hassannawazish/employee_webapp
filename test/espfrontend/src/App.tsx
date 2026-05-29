@@ -8,30 +8,31 @@ import TemperatureCard from './components/TemperatureCard/TemperatureCard';
 function App() {
   return (
     <main className="app-shell">
-      <section className="monitor-layout" aria-label="ESP32 sensor monitor">
+      <section className="monitor-layout" aria-label="Moniteur de capteurs ESP32">
         <div className="monitor-copy">
           <div className="brand-lockup">
             <div className="brand-logo-wrap">
-              <img className="brand-logo" src={scaiLogo} alt="SCAI Systems logo" />
+              <img className="brand-logo" src={scaiLogo} alt="Logo SCAI Systems" />
             </div>
             <div>
               <p className="eyebrow">SCAI Systems</p>
-              <h1>SCAI Sensor Command Center</h1>
+              <h1>Centre de Commande des Capteurs SCAI</h1>
             </div>
           </div>
           <p className="lede">
-            A cleaner live operations view for your company environment. Track
-            temperature, rain, gas, and LED activity in one place with
-            real-time MQTT updates from your field hardware.
+            Une vue en direct plus claire pour l'environnement de votre
+            entreprise. Suivez la temperature, la pluie, le gaz et l'activite
+            LED au meme endroit grace aux mises a jour MQTT en temps reel de
+            votre materiel sur le terrain.
           </p>
-          <div className="monitor-highlights" aria-label="Dashboard summary">
+          <div className="monitor-highlights" aria-label="Resume du tableau de bord">
             <div className="highlight-chip">
-              <span className="highlight-label">Brand</span>
+              <span className="highlight-label">Marque</span>
               <strong>SCAI Systems</strong>
             </div>
             <div className="highlight-chip">
-              <span className="highlight-label">Feeds</span>
-              <strong>4 Live Cards</strong>
+              <span className="highlight-label">Flux</span>
+              <strong>4 cartes en direct</strong>
             </div>
             <div className="highlight-chip">
               <span className="highlight-label">Transport</span>
@@ -40,7 +41,7 @@ function App() {
           </div>
           <div className="monitor-note">
             <span className="note-pulse" aria-hidden="true" />
-            Built for branded monitoring instead of a generic ESP32 demo page.
+            Concu pour une supervision de marque plutot qu'une page de demo ESP32 generique.
           </div>
         </div>
 

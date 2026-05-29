@@ -4,7 +4,7 @@ import './TemperatureCard.css';
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'Waiting for first reading';
+    return 'En attente de la premiere mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -16,7 +16,7 @@ function formatTime(value?: string) {
 
 function TemperatureCard() {
   const [reading, setReading] = useState<TemperatureReading | null>(null);
-  const [status, setStatus] = useState('Connecting to MQTT...');
+  const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
     const subscription = subscribeToTemperature(
@@ -38,21 +38,21 @@ function TemperatureCard() {
   return (
     <article className="temperature-card">
       <div className="card-topline">
-        <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
+        <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current ESP32 internal temperature ${temperature}`}>
+      <div className="gauge" aria-label={`Temperature interne actuelle de l'ESP32 ${temperature}`}>
         <span>{temperature}</span>
       </div>
 
       <dl className="reading-meta">
         <div>
-          <dt>Device</dt>
+          <dt>Appareil</dt>
           <dd>{reading?.deviceId ?? 'ESP32'}</dd>
         </div>
         <div>
-          <dt>Updated</dt>
+          <dt>Mise a jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>

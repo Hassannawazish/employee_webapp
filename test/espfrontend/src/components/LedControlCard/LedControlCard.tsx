@@ -4,7 +4,7 @@ import '../TemperatureCard/TemperatureCard.css';
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'Waiting for first update';
+    return 'En attente de la premiere mise a jour';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -16,8 +16,8 @@ function formatTime(value?: string) {
 
 function LedControlCard() {
   const [ledState, setLedState] = useState<LedState | null>(null);
-  const [status, setStatus] = useState('Connecting to MQTT...');
-  const [commandStatus, setCommandStatus] = useState('Ready to send');
+  const [status, setStatus] = useState('Connexion a MQTT...');
+  const [commandStatus, setCommandStatus] = useState('Pret a envoyer');
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
@@ -38,11 +38,11 @@ function LedControlCard() {
   async function handleToggle(nextEnabled: boolean) {
     try {
       setIsSending(true);
-      setCommandStatus(`Sending ${String(nextEnabled)}...`);
+      setCommandStatus(`Envoi de ${String(nextEnabled)}...`);
       await publishLedCommand(nextEnabled);
-      setCommandStatus(`Command sent: ${String(nextEnabled)}`);
+      setCommandStatus(`Commande envoyee : ${String(nextEnabled)}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to publish LED command.';
+      const message = error instanceof Error ? error.message : "Impossible d'envoyer la commande LED.";
       setCommandStatus(message);
     } finally {
       setIsSending(false);
@@ -55,11 +55,11 @@ function LedControlCard() {
   return (
     <article className="temperature-card led-card">
       <div className="card-topline">
-        <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
+        <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current LED state ${ledLabel}`}>
+      <div className="gauge" aria-label={`Etat actuel de la LED ${ledLabel}`}>
         <span>{ledLabel}</span>
       </div>
 
@@ -70,7 +70,7 @@ function LedControlCard() {
           onClick={() => handleToggle(false)}
           disabled={isSending}
         >
-          False
+          Desactive
         </button>
         <button
           type="button"
@@ -78,7 +78,7 @@ function LedControlCard() {
           onClick={() => handleToggle(true)}
           disabled={isSending}
         >
-          True
+          Active
         </button>
       </div>
 
@@ -86,19 +86,19 @@ function LedControlCard() {
 
       <dl className="reading-meta">
         <div>
-          <dt>GPIO Pin</dt>
+          <dt>Broche GPIO</dt>
           <dd>{ledState?.pin ?? '--'}</dd>
         </div>
         <div>
-          <dt>State</dt>
+          <dt>Etat</dt>
           <dd>{ledLabel}</dd>
         </div>
         <div>
           <dt>Source</dt>
-          <dd>{ledState?.source ?? 'MQTT command'}</dd>
+          <dd>{ledState?.source ?? 'Commande MQTT'}</dd>
         </div>
         <div>
-          <dt>Updated</dt>
+          <dt>Mise a jour</dt>
           <dd>{formatTime(ledState?.recordedAtUtc)}</dd>
         </div>
       </dl>
