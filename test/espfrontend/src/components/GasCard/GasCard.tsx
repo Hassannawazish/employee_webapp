@@ -9,7 +9,7 @@ type GasCardProps = {
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'Waiting for first reading';
+    return 'En attente de la premiere mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -21,7 +21,7 @@ function formatTime(value?: string) {
 
 function GasCard({ roomName, topic }: GasCardProps) {
   const [reading, setReading] = useState<GasReading | null>(null);
-  const [status, setStatus] = useState('Connecting to MQTT...');
+  const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
     const subscription = subscribeToGasSensor(
@@ -39,39 +39,39 @@ function GasCard({ roomName, topic }: GasCardProps) {
     };
   }, [topic]);
 
-  const smokeState = reading ? (reading.gasDetected ? 'Detected' : 'Clear') : '--';
+  const smokeState = reading ? (reading.gasDetected ? 'Detectee' : 'Normale') : '--';
   const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
     <article className="temperature-card gas-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Smoke Sensor</h3>
+        <h3 className="card-title">Detecteur de fumee</h3>
       </div>
       <div className="card-topline">
-        <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
+        <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current smoke sensor state ${smokeState}`}>
+      <div className="gauge" aria-label={`Etat actuel du detecteur de fumee ${smokeState}`}>
         <span>{smokeState}</span>
       </div>
 
       <dl className="reading-meta">
         <div>
-          <dt>GPIO Pin</dt>
+          <dt>Broche GPIO</dt>
           <dd>{reading?.pin ?? '--'}</dd>
         </div>
         <div>
-          <dt>Digital State</dt>
+          <dt>Etat numerique</dt>
           <dd>{digitalState}</dd>
         </div>
         <div>
-          <dt>Sensor</dt>
-          <dd>Smoke detector</dd>
+          <dt>Capteur</dt>
+          <dd>Detecteur de fumee</dd>
         </div>
         <div>
-          <dt>Status</dt>
+          <dt>Statut</dt>
           <dd>{smokeState}</dd>
         </div>
         <div>

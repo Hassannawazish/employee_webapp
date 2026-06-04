@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <circle cx="160" cy="176" r="72" fill="#E0F2FE"/>
+  <circle cx="352" cy="176" r="72" fill="#FFEDD5"/>
+  <circle cx="256" cy="320" r="88" fill="#DCFCE7"/>
+  <path d="M138 176C138 163.85 147.85 154 160 154H352C364.15 154 374 163.85 374 176C374 188.15 364.15 198 352 198H160C147.85 198 138 188.15 138 176Z" fill="#0F172A"/>
+  <path d="M234 126C234 113.85 243.85 104 256 104C268.15 104 278 113.85 278 126V352C278 364.15 268.15 374 256 374C243.85 374 234 364.15 234 352V126Z" fill="#0F172A"/>
+  <text x="256" y="448" text-anchor="middle" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">SCAI</text>
+  <defs>
+    <linearGradient id="bg" x1="40" y1="36" x2="464" y2="476" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#E2E8F0"/>
+    </linearGradient>
+  </defs>
+</svg>

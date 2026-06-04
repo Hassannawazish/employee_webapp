@@ -9,7 +9,7 @@ type LightCardProps = {
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'Waiting for first reading';
+    return 'En attente de la premiere mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -21,7 +21,7 @@ function formatTime(value?: string) {
 
 function LightCard({ roomName, topic }: LightCardProps) {
   const [reading, setReading] = useState<LightReading | null>(null);
-  const [status, setStatus] = useState('Connecting to MQTT...');
+  const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
     const subscription = subscribeToLightSensor(
@@ -45,32 +45,32 @@ function LightCard({ roomName, topic }: LightCardProps) {
     <article className="temperature-card light-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Light Sensor</h3>
+        <h3 className="card-title">Capteur de lumiere</h3>
       </div>
       <div className="card-topline">
-        <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
+        <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current light sensor level ${lightLevel}`}>
+      <div className="gauge" aria-label={`Niveau actuel du capteur de lumiere ${lightLevel}`}>
         <span>{lightLevel}</span>
       </div>
 
       <dl className="reading-meta">
         <div>
-          <dt>Device</dt>
+          <dt>Appareil</dt>
           <dd>{reading?.deviceId ?? 'ESP32'}</dd>
         </div>
         <div>
-          <dt>Measure</dt>
-          <dd>Light level</dd>
+          <dt>Mesure</dt>
+          <dd>Niveau de lumiere</dd>
         </div>
         <div>
-          <dt>Level</dt>
+          <dt>Niveau</dt>
           <dd>{lightLevel}</dd>
         </div>
         <div>
-          <dt>Updated</dt>
+          <dt>Mise a jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>

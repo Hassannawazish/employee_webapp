@@ -9,7 +9,7 @@ type RainCardProps = {
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'Waiting for first reading';
+    return 'En attente de la premiere mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -21,7 +21,7 @@ function formatTime(value?: string) {
 
 function RainCard({ roomName, topic }: RainCardProps) {
   const [reading, setReading] = useState<RainReading | null>(null);
-  const [status, setStatus] = useState('Connecting to MQTT...');
+  const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
     const subscription = subscribeToRainSensor(
@@ -39,39 +39,39 @@ function RainCard({ roomName, topic }: RainCardProps) {
     };
   }, [topic]);
 
-  const doorLockState = reading ? (reading.rainDetected ? 'Locked' : 'Unlocked') : '--';
+  const doorLockState = reading ? (reading.rainDetected ? 'Verrouillee' : 'Deverrouillee') : '--';
   const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
     <article className="temperature-card rain-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Door Lock Status</h3>
+        <h3 className="card-title">Etat du verrouillage de la porte</h3>
       </div>
       <div className="card-topline">
-        <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
+        <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current door lock status ${doorLockState}`}>
+      <div className="gauge" aria-label={`Etat actuel du verrouillage de la porte ${doorLockState}`}>
         <span>{doorLockState}</span>
       </div>
 
       <dl className="reading-meta">
         <div>
-          <dt>GPIO Pin</dt>
+          <dt>Broche GPIO</dt>
           <dd>{reading?.pin ?? '--'}</dd>
         </div>
         <div>
-          <dt>Digital State</dt>
+          <dt>Etat numerique</dt>
           <dd>{digitalState}</dd>
         </div>
         <div>
-          <dt>Access</dt>
-          <dd>Main door lock</dd>
+          <dt>Acces</dt>
+          <dd>Verrou principal</dd>
         </div>
         <div>
-          <dt>Status</dt>
+          <dt>Statut</dt>
           <dd>{doorLockState}</dd>
         </div>
         <div>

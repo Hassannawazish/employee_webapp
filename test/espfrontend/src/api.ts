@@ -78,10 +78,10 @@ function subscribeToSensor<TReading>(
   });
 
   client.on('connect', () => {
-    onStatus('Connected to MQTT');
+    onStatus('Connecte a MQTT');
     client.subscribe(sensor.topic, { qos: 0 }, (error: Error | null) => {
       if (error) {
-        onStatus('Unable to subscribe to MQTT topic.');
+        onStatus("Impossible de s'abonner au sujet MQTT.");
       } else {
         onStatus(sensor.waitingStatus);
       }
@@ -89,22 +89,22 @@ function subscribeToSensor<TReading>(
   });
 
   client.on('reconnect', () => {
-    onStatus('Reconnecting to MQTT...');
+    onStatus('Reconnexion a MQTT...');
   });
 
   client.on('offline', () => {
-    onStatus('MQTT connection is offline.');
+    onStatus('La connexion MQTT est hors ligne.');
   });
 
   client.on('error', () => {
-    onStatus('MQTT connection error.');
+    onStatus('Erreur de connexion MQTT.');
   });
 
   client.on('message', (_topic: string, message: Buffer) => {
     try {
       const reading = JSON.parse(message.toString()) as TReading;
       onReading(reading);
-      onStatus('Live');
+      onStatus('En direct');
     } catch {
       onStatus(sensor.invalidPayloadStatus);
     }
@@ -125,8 +125,8 @@ export function subscribeToTemperature(
   return subscribeToSensor<TemperatureReading>(
     {
       topic,
-      waitingStatus: 'Waiting for temperature reading...',
-      invalidPayloadStatus: 'Received invalid temperature payload.'
+      waitingStatus: 'En attente de la mesure de temperature...',
+      invalidPayloadStatus: 'Mesure de temperature recue invalide.'
     },
     onReading,
     onStatus
@@ -141,8 +141,8 @@ export function subscribeToRainSensor(
   return subscribeToSensor<RainReading>(
     {
       topic,
-      waitingStatus: 'Waiting for rain sensor reading...',
-      invalidPayloadStatus: 'Received invalid rain sensor payload.'
+      waitingStatus: "En attente de l'etat de verrouillage de la porte...",
+      invalidPayloadStatus: 'Etat de verrouillage de la porte recu invalide.'
     },
     onReading,
     onStatus
@@ -157,8 +157,8 @@ export function subscribeToLightSensor(
   return subscribeToSensor<LightReading>(
     {
       topic,
-      waitingStatus: 'Waiting for light sensor reading...',
-      invalidPayloadStatus: 'Received invalid light sensor payload.'
+      waitingStatus: 'En attente de la mesure du capteur de lumiere...',
+      invalidPayloadStatus: 'Mesure du capteur de lumiere recue invalide.'
     },
     onReading,
     onStatus
@@ -173,8 +173,8 @@ export function subscribeToGasSensor(
   return subscribeToSensor<GasReading>(
     {
       topic,
-      waitingStatus: 'Waiting for gas sensor reading...',
-      invalidPayloadStatus: 'Received invalid gas sensor payload.'
+      waitingStatus: 'En attente de la mesure du detecteur de fumee...',
+      invalidPayloadStatus: 'Mesure du detecteur de fumee recue invalide.'
     },
     onReading,
     onStatus
@@ -189,8 +189,8 @@ export function subscribeToLedState(
   return subscribeToSensor<LedState>(
     {
       topic,
-      waitingStatus: 'Waiting for LED state...',
-      invalidPayloadStatus: 'Received invalid LED state payload.'
+      waitingStatus: "En attente de l'etat du controle de porte...",
+      invalidPayloadStatus: 'Etat du controle de porte recu invalide.'
     },
     onReading,
     onStatus
@@ -251,18 +251,18 @@ export function publishLedCommand(
     });
 
     client.on('error', (error) => {
-      const message = error instanceof Error ? error.message : 'MQTT connection error.';
+      const message = error instanceof Error ? error.message : 'Erreur de connexion MQTT.';
       closeWithError(message);
     });
 
     client.on('offline', () => {
-      closeWithError('MQTT connection is offline.');
+      closeWithError('La connexion MQTT est hors ligne.');
     });
 
     client.on('close', () => {
       if (!settled) {
         settled = true;
-        reject(new Error('MQTT connection closed before the LED command was sent.'));
+        reject(new Error("La connexion MQTT s'est fermee avant l'envoi de la commande de porte."));
       }
     });
   });
