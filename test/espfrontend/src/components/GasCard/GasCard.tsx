@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { GasReading, subscribeToGasSensor } from '../../api';
 import '../TemperatureCard/TemperatureCard.css';
 
+type GasCardProps = {
+  roomName: string;
+  topic?: string;
+};
+
 function formatTime(value?: string) {
   if (!value) {
     return 'Waiting for first reading';
@@ -14,7 +19,7 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function GasCard() {
+function GasCard({ roomName, topic }: GasCardProps) {
   const [reading, setReading] = useState<GasReading | null>(null);
   const [status, setStatus] = useState('Connecting to MQTT...');
 
@@ -25,26 +30,31 @@ function GasCard() {
       },
       (nextStatus) => {
         setStatus(nextStatus);
-      }
+      },
+      topic
     );
 
     return () => {
       subscription.close();
     };
-  }, []);
+  }, [topic]);
 
-  const gasState = reading ? (reading.gasDetected ? 'Detected' : 'Clear') : '--';
+  const smokeState = reading ? (reading.gasDetected ? 'Detected' : 'Clear') : '--';
   const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
     <article className="temperature-card gas-card">
+      <div className="card-heading">
+        <p className="card-room">{roomName}</p>
+        <h3 className="card-title">Smoke Sensor</h3>
+      </div>
       <div className="card-topline">
         <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current gas sensor state ${gasState}`}>
-        <span>{gasState}</span>
+      <div className="gauge" aria-label={`Current smoke sensor state ${smokeState}`}>
+        <span>{smokeState}</span>
       </div>
 
       <dl className="reading-meta">
@@ -58,7 +68,11 @@ function GasCard() {
         </div>
         <div>
           <dt>Sensor</dt>
-          <dd>Gas / smoke</dd>
+          <dd>Smoke detector</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{smokeState}</dd>
         </div>
         <div>
           <dt>Updated</dt>

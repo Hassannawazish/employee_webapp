@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { subscribeToTemperature, TemperatureReading } from '../../api';
-import './TemperatureCard.css';
+import { LightReading, subscribeToLightSensor } from '../../api';
+import '../TemperatureCard/TemperatureCard.css';
 
-type TemperatureCardProps = {
+type LightCardProps = {
   roomName: string;
   topic?: string;
 };
@@ -19,12 +19,12 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function TemperatureCard({ roomName, topic }: TemperatureCardProps) {
-  const [reading, setReading] = useState<TemperatureReading | null>(null);
+function LightCard({ roomName, topic }: LightCardProps) {
+  const [reading, setReading] = useState<LightReading | null>(null);
   const [status, setStatus] = useState('Connecting to MQTT...');
 
   useEffect(() => {
-    const subscription = subscribeToTemperature(
+    const subscription = subscribeToLightSensor(
       (latestReading) => {
         setReading(latestReading);
       },
@@ -39,21 +39,21 @@ function TemperatureCard({ roomName, topic }: TemperatureCardProps) {
     };
   }, [topic]);
 
-  const temperature = reading ? `${reading.temperatureC.toFixed(1)} C` : '--.- C';
+  const lightLevel = reading ? `${reading.lightLevel.toFixed(0)} lux` : '-- lux';
 
   return (
-    <article className="temperature-card">
+    <article className="temperature-card light-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Temperature Sensor</h3>
+        <h3 className="card-title">Light Sensor</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current temperature sensor level ${temperature}`}>
-        <span>{temperature}</span>
+      <div className="gauge" aria-label={`Current light sensor level ${lightLevel}`}>
+        <span>{lightLevel}</span>
       </div>
 
       <dl className="reading-meta">
@@ -63,7 +63,11 @@ function TemperatureCard({ roomName, topic }: TemperatureCardProps) {
         </div>
         <div>
           <dt>Measure</dt>
-          <dd>Temperature</dd>
+          <dd>Light level</dd>
+        </div>
+        <div>
+          <dt>Level</dt>
+          <dd>{lightLevel}</dd>
         </div>
         <div>
           <dt>Updated</dt>
@@ -74,4 +78,4 @@ function TemperatureCard({ roomName, topic }: TemperatureCardProps) {
   );
 }
 
-export default TemperatureCard;
+export default LightCard;

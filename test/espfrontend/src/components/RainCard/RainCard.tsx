@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { RainReading, subscribeToRainSensor } from '../../api';
 import '../TemperatureCard/TemperatureCard.css';
 
+type RainCardProps = {
+  roomName: string;
+  topic?: string;
+};
+
 function formatTime(value?: string) {
   if (!value) {
     return 'Waiting for first reading';
@@ -14,7 +19,7 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function RainCard() {
+function RainCard({ roomName, topic }: RainCardProps) {
   const [reading, setReading] = useState<RainReading | null>(null);
   const [status, setStatus] = useState('Connecting to MQTT...');
 
@@ -25,26 +30,31 @@ function RainCard() {
       },
       (nextStatus) => {
         setStatus(nextStatus);
-      }
+      },
+      topic
     );
 
     return () => {
       subscription.close();
     };
-  }, []);
+  }, [topic]);
 
-  const rainState = reading ? (reading.rainDetected ? 'Wet' : 'Dry') : '--';
+  const doorLockState = reading ? (reading.rainDetected ? 'Locked' : 'Unlocked') : '--';
   const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
     <article className="temperature-card rain-card">
+      <div className="card-heading">
+        <p className="card-room">{roomName}</p>
+        <h3 className="card-title">Door Lock Status</h3>
+      </div>
       <div className="card-topline">
         <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current rain sensor state ${rainState}`}>
-        <span>{rainState}</span>
+      <div className="gauge" aria-label={`Current door lock status ${doorLockState}`}>
+        <span>{doorLockState}</span>
       </div>
 
       <dl className="reading-meta">
@@ -57,8 +67,12 @@ function RainCard() {
           <dd>{digitalState}</dd>
         </div>
         <div>
-          <dt>Sensor</dt>
-          <dd>Rain / water</dd>
+          <dt>Access</dt>
+          <dd>Main door lock</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{doorLockState}</dd>
         </div>
         <div>
           <dt>Updated</dt>

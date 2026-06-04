@@ -7,6 +7,12 @@ export type TemperatureReading = {
   recordedAtUtc: string;
 };
 
+export type LightReading = {
+  lightLevel: number;
+  deviceId: string;
+  recordedAtUtc: string;
+};
+
 export type RainReading = {
   rainDetected: boolean;
   digitalState: number;
@@ -40,6 +46,7 @@ const temperatureTopic =
   process.env.REACT_APP_MQTT_TEMPERATURE_TOPIC ??
   process.env.REACT_APP_MQTT_TOPIC ??
   'hassa/esp32-office/temperature';
+const lightTopic = process.env.REACT_APP_MQTT_LIGHT_TOPIC ?? 'hassa/esp32-office/light';
 const rainTopic = process.env.REACT_APP_MQTT_RAIN_TOPIC ?? 'hassa/esp32-office/rain';
 const gasTopic = process.env.REACT_APP_MQTT_GAS_TOPIC ?? 'hassa/esp32-office/gas';
 const ledCommandTopic =
@@ -112,11 +119,12 @@ function subscribeToSensor<TReading>(
 
 export function subscribeToTemperature(
   onReading: (reading: TemperatureReading) => void,
-  onStatus: (status: string) => void
+  onStatus: (status: string) => void,
+  topic = temperatureTopic
 ): TemperatureSubscription {
   return subscribeToSensor<TemperatureReading>(
     {
-      topic: temperatureTopic,
+      topic,
       waitingStatus: 'Waiting for temperature reading...',
       invalidPayloadStatus: 'Received invalid temperature payload.'
     },
@@ -127,11 +135,12 @@ export function subscribeToTemperature(
 
 export function subscribeToRainSensor(
   onReading: (reading: RainReading) => void,
-  onStatus: (status: string) => void
+  onStatus: (status: string) => void,
+  topic = rainTopic
 ): TemperatureSubscription {
   return subscribeToSensor<RainReading>(
     {
-      topic: rainTopic,
+      topic,
       waitingStatus: 'Waiting for rain sensor reading...',
       invalidPayloadStatus: 'Received invalid rain sensor payload.'
     },
@@ -140,13 +149,30 @@ export function subscribeToRainSensor(
   );
 }
 
+export function subscribeToLightSensor(
+  onReading: (reading: LightReading) => void,
+  onStatus: (status: string) => void,
+  topic = lightTopic
+): TemperatureSubscription {
+  return subscribeToSensor<LightReading>(
+    {
+      topic,
+      waitingStatus: 'Waiting for light sensor reading...',
+      invalidPayloadStatus: 'Received invalid light sensor payload.'
+    },
+    onReading,
+    onStatus
+  );
+}
+
 export function subscribeToGasSensor(
   onReading: (reading: GasReading) => void,
-  onStatus: (status: string) => void
+  onStatus: (status: string) => void,
+  topic = gasTopic
 ): TemperatureSubscription {
   return subscribeToSensor<GasReading>(
     {
-      topic: gasTopic,
+      topic,
       waitingStatus: 'Waiting for gas sensor reading...',
       invalidPayloadStatus: 'Received invalid gas sensor payload.'
     },
@@ -157,11 +183,12 @@ export function subscribeToGasSensor(
 
 export function subscribeToLedState(
   onReading: (reading: LedState) => void,
-  onStatus: (status: string) => void
+  onStatus: (status: string) => void,
+  topic = ledStateTopic
 ): TemperatureSubscription {
   return subscribeToSensor<LedState>(
     {
-      topic: ledStateTopic,
+      topic,
       waitingStatus: 'Waiting for LED state...',
       invalidPayloadStatus: 'Received invalid LED state payload.'
     },
@@ -170,7 +197,10 @@ export function subscribeToLedState(
   );
 }
 
-export function publishLedCommand(enabled: boolean): Promise<void> {
+export function publishLedCommand(
+  enabled: boolean,
+  commandTopic = ledCommandTopic
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const clientId = `espfrontend-led-publisher-${Math.random().toString(16).slice(2)}`;
     const client: MqttClient = mqtt.connect(mqttUrl, {
@@ -207,7 +237,7 @@ export function publishLedCommand(enabled: boolean): Promise<void> {
 
     client.on('connect', () => {
       client.publish(
-        ledCommandTopic,
+        commandTopic,
         enabled ? 'true' : 'false',
         { qos: 1, retain: true },
         (error?: Error | null) => {
