@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { RainReading, subscribeToRainSensor } from '../../api';
+import { LightReading, subscribeToLightSensor } from '../../api';
 import '../TemperatureCard/TemperatureCard.css';
 
-type RainCardProps = {
+type LightCardProps = {
   roomName: string;
   topic?: string;
 };
@@ -19,12 +19,12 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function RainCard({ roomName, topic }: RainCardProps) {
-  const [reading, setReading] = useState<RainReading | null>(null);
+function LightCard({ roomName, topic }: LightCardProps) {
+  const [reading, setReading] = useState<LightReading | null>(null);
   const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
-    const subscription = subscribeToRainSensor(
+    const subscription = subscribeToLightSensor(
       (latestReading) => {
         setReading(latestReading);
       },
@@ -39,43 +39,38 @@ function RainCard({ roomName, topic }: RainCardProps) {
     };
   }, [topic]);
 
-  const doorLockState = reading ? (reading.rainDetected ? 'Verrouillee' : 'Deverrouillee') : '--';
-  const digitalState = reading ? String(reading.digitalState) : '--';
+  const lightLevel = reading ? `${reading.lightLevel.toFixed(0)} lux` : '-- lux';
 
   return (
-    <article className="temperature-card rain-card">
+    <article className="temperature-card light-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Etat du verrouillage de la porte</h3>
+        <h3 className="card-title">Capteur de lumiere</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Etat actuel du verrouillage de la porte ${doorLockState}`}>
-        <span>{doorLockState}</span>
+      <div className="gauge" aria-label={`Niveau actuel du capteur de lumiere ${lightLevel}`}>
+        <span>{lightLevel}</span>
       </div>
 
       <dl className="reading-meta">
         <div>
-          <dt>Broche GPIO</dt>
-          <dd>{reading?.pin ?? '--'}</dd>
+          <dt>Appareil</dt>
+          <dd>{reading?.deviceId ?? 'ESP32'}</dd>
         </div>
         <div>
-          <dt>Etat numerique</dt>
-          <dd>{digitalState}</dd>
+          <dt>Mesure</dt>
+          <dd>Niveau de lumiere</dd>
         </div>
         <div>
-          <dt>Acces</dt>
-          <dd>Verrou principal</dd>
+          <dt>Niveau</dt>
+          <dd>{lightLevel}</dd>
         </div>
         <div>
-          <dt>Statut</dt>
-          <dd>{doorLockState}</dd>
-        </div>
-        <div>
-          <dt>Updated</dt>
+          <dt>Mise a jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>
@@ -83,4 +78,4 @@ function RainCard({ roomName, topic }: RainCardProps) {
   );
 }
 
-export default RainCard;
+export default LightCard;

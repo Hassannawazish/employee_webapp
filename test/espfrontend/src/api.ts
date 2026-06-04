@@ -7,8 +7,22 @@ export type TemperatureReading = {
   recordedAtUtc: string;
 };
 
+export type LightReading = {
+  lightLevel: number;
+  deviceId: string;
+  recordedAtUtc: string;
+};
+
 export type RainReading = {
   rainDetected: boolean;
+  digitalState: number;
+  pin: number;
+  deviceId: string;
+  recordedAtUtc: string;
+};
+
+export type GasReading = {
+  gasDetected: boolean;
   digitalState: number;
   pin: number;
   deviceId: string;
@@ -32,7 +46,9 @@ const temperatureTopic =
   process.env.REACT_APP_MQTT_TEMPERATURE_TOPIC ??
   process.env.REACT_APP_MQTT_TOPIC ??
   'hassa/esp32-office/temperature';
+const lightTopic = process.env.REACT_APP_MQTT_LIGHT_TOPIC ?? 'hassa/esp32-office/light';
 const rainTopic = process.env.REACT_APP_MQTT_RAIN_TOPIC ?? 'hassa/esp32-office/rain';
+const gasTopic = process.env.REACT_APP_MQTT_GAS_TOPIC ?? 'hassa/esp32-office/gas';
 const ledCommandTopic =
   process.env.REACT_APP_MQTT_LED_COMMAND_TOPIC ?? 'hassa/esp32-office/led/command';
 const ledStateTopic =
@@ -62,10 +78,10 @@ function subscribeToSensor<TReading>(
   });
 
   client.on('connect', () => {
-    onStatus('Connected to MQTT');
+    onStatus('Connecte a MQTT');
     client.subscribe(sensor.topic, { qos: 0 }, (error: Error | null) => {
       if (error) {
-        onStatus('Unable to subscribe to MQTT topic.');
+        onStatus("Impossible de s'abonner au sujet MQTT.");
       } else {
         onStatus(sensor.waitingStatus);
       }
@@ -73,22 +89,22 @@ function subscribeToSensor<TReading>(
   });
 
   client.on('reconnect', () => {
-    onStatus('Reconnecting to MQTT...');
+    onStatus('Reconnexion a MQTT...');
   });
 
   client.on('offline', () => {
-    onStatus('MQTT connection is offline.');
+    onStatus('La connexion MQTT est hors ligne.');
   });
 
   client.on('error', () => {
-    onStatus('MQTT connection error.');
+    onStatus('Erreur de connexion MQTT.');
   });
 
   client.on('message', (_topic: string, message: Buffer) => {
     try {
       const reading = JSON.parse(message.toString()) as TReading;
       onReading(reading);
-      onStatus('Live');
+      onStatus('En direct');
     } catch {
       onStatus(sensor.invalidPayloadStatus);
     }
@@ -103,13 +119,14 @@ function subscribeToSensor<TReading>(
 
 export function subscribeToTemperature(
   onReading: (reading: TemperatureReading) => void,
-  onStatus: (status: string) => void
+  onStatus: (status: string) => void,
+  topic = temperatureTopic
 ): TemperatureSubscription {
   return subscribeToSensor<TemperatureReading>(
     {
-      topic: temperatureTopic,
-      waitingStatus: 'Waiting for temperature reading...',
-      invalidPayloadStatus: 'Received invalid temperature payload.'
+      topic,
+      waitingStatus: 'En attente de la mesure de temperature...',
+      invalidPayloadStatus: 'Mesure de temperature recue invalide.'
     },
     onReading,
     onStatus
@@ -118,13 +135,46 @@ export function subscribeToTemperature(
 
 export function subscribeToRainSensor(
   onReading: (reading: RainReading) => void,
-  onStatus: (status: string) => void
+  onStatus: (status: string) => void,
+  topic = rainTopic
 ): TemperatureSubscription {
   return subscribeToSensor<RainReading>(
     {
-      topic: rainTopic,
-      waitingStatus: 'Waiting for rain sensor reading...',
-      invalidPayloadStatus: 'Received invalid rain sensor payload.'
+      topic,
+      waitingStatus: "En attente de l'etat de verrouillage de la porte...",
+      invalidPayloadStatus: 'Etat de verrouillage de la porte recu invalide.'
+    },
+    onReading,
+    onStatus
+  );
+}
+
+export function subscribeToLightSensor(
+  onReading: (reading: LightReading) => void,
+  onStatus: (status: string) => void,
+  topic = lightTopic
+): TemperatureSubscription {
+  return subscribeToSensor<LightReading>(
+    {
+      topic,
+      waitingStatus: 'En attente de la mesure du capteur de lumiere...',
+      invalidPayloadStatus: 'Mesure du capteur de lumiere recue invalide.'
+    },
+    onReading,
+    onStatus
+  );
+}
+
+export function subscribeToGasSensor(
+  onReading: (reading: GasReading) => void,
+  onStatus: (status: string) => void,
+  topic = gasTopic
+): TemperatureSubscription {
+  return subscribeToSensor<GasReading>(
+    {
+      topic,
+      waitingStatus: 'En attente de la mesure du detecteur de fumee...',
+      invalidPayloadStatus: 'Mesure du detecteur de fumee recue invalide.'
     },
     onReading,
     onStatus
@@ -133,20 +183,24 @@ export function subscribeToRainSensor(
 
 export function subscribeToLedState(
   onReading: (reading: LedState) => void,
-  onStatus: (status: string) => void
+  onStatus: (status: string) => void,
+  topic = ledStateTopic
 ): TemperatureSubscription {
   return subscribeToSensor<LedState>(
     {
-      topic: ledStateTopic,
-      waitingStatus: 'Waiting for LED state...',
-      invalidPayloadStatus: 'Received invalid LED state payload.'
+      topic,
+      waitingStatus: "En attente de l'etat du controle de porte...",
+      invalidPayloadStatus: 'Etat du controle de porte recu invalide.'
     },
     onReading,
     onStatus
   );
 }
 
-export function publishLedCommand(enabled: boolean): Promise<void> {
+export function publishLedCommand(
+  enabled: boolean,
+  commandTopic = ledCommandTopic
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const clientId = `espfrontend-led-publisher-${Math.random().toString(16).slice(2)}`;
     const client: MqttClient = mqtt.connect(mqttUrl, {
@@ -183,7 +237,7 @@ export function publishLedCommand(enabled: boolean): Promise<void> {
 
     client.on('connect', () => {
       client.publish(
-        ledCommandTopic,
+        commandTopic,
         enabled ? 'true' : 'false',
         { qos: 1, retain: true },
         (error?: Error | null) => {
@@ -197,18 +251,18 @@ export function publishLedCommand(enabled: boolean): Promise<void> {
     });
 
     client.on('error', (error) => {
-      const message = error instanceof Error ? error.message : 'MQTT connection error.';
+      const message = error instanceof Error ? error.message : 'Erreur de connexion MQTT.';
       closeWithError(message);
     });
 
     client.on('offline', () => {
-      closeWithError('MQTT connection is offline.');
+      closeWithError('La connexion MQTT est hors ligne.');
     });
 
     client.on('close', () => {
       if (!settled) {
         settled = true;
-        reject(new Error('MQTT connection closed before the LED command was sent.'));
+        reject(new Error("La connexion MQTT s'est fermee avant l'envoi de la commande de porte."));
       }
     });
   });

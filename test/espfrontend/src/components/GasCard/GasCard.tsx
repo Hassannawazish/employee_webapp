@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { RainReading, subscribeToRainSensor } from '../../api';
+import { GasReading, subscribeToGasSensor } from '../../api';
 import '../TemperatureCard/TemperatureCard.css';
 
-type RainCardProps = {
+type GasCardProps = {
   roomName: string;
   topic?: string;
 };
@@ -19,12 +19,12 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function RainCard({ roomName, topic }: RainCardProps) {
-  const [reading, setReading] = useState<RainReading | null>(null);
+function GasCard({ roomName, topic }: GasCardProps) {
+  const [reading, setReading] = useState<GasReading | null>(null);
   const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
-    const subscription = subscribeToRainSensor(
+    const subscription = subscribeToGasSensor(
       (latestReading) => {
         setReading(latestReading);
       },
@@ -39,22 +39,22 @@ function RainCard({ roomName, topic }: RainCardProps) {
     };
   }, [topic]);
 
-  const doorLockState = reading ? (reading.rainDetected ? 'Verrouillee' : 'Deverrouillee') : '--';
+  const smokeState = reading ? (reading.gasDetected ? 'Detectee' : 'Normale') : '--';
   const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
-    <article className="temperature-card rain-card">
+    <article className="temperature-card gas-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Etat du verrouillage de la porte</h3>
+        <h3 className="card-title">Detecteur de fumee</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Etat actuel du verrouillage de la porte ${doorLockState}`}>
-        <span>{doorLockState}</span>
+      <div className="gauge" aria-label={`Etat actuel du detecteur de fumee ${smokeState}`}>
+        <span>{smokeState}</span>
       </div>
 
       <dl className="reading-meta">
@@ -67,12 +67,12 @@ function RainCard({ roomName, topic }: RainCardProps) {
           <dd>{digitalState}</dd>
         </div>
         <div>
-          <dt>Acces</dt>
-          <dd>Verrou principal</dd>
+          <dt>Capteur</dt>
+          <dd>Detecteur de fumee</dd>
         </div>
         <div>
           <dt>Statut</dt>
-          <dd>{doorLockState}</dd>
+          <dd>{smokeState}</dd>
         </div>
         <div>
           <dt>Updated</dt>
@@ -83,4 +83,4 @@ function RainCard({ roomName, topic }: RainCardProps) {
   );
 }
 
-export default RainCard;
+export default GasCard;

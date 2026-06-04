@@ -2,9 +2,15 @@ import { useEffect, useState } from 'react';
 import { LedState, publishLedCommand, subscribeToLedState } from '../../api';
 import '../TemperatureCard/TemperatureCard.css';
 
+type LedControlCardProps = {
+  roomName: string;
+  commandTopic?: string;
+  stateTopic?: string;
+};
+
 function formatTime(value?: string) {
   if (!value) {
-    return 'Waiting for first update';
+    return 'En attente de la premiere mise a jour';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -14,10 +20,14 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function LedControlCard() {
+function LedControlCard({
+  roomName,
+  commandTopic,
+  stateTopic
+}: LedControlCardProps) {
   const [ledState, setLedState] = useState<LedState | null>(null);
-  const [status, setStatus] = useState('Connecting to MQTT...');
-  const [commandStatus, setCommandStatus] = useState('Ready to send');
+  const [status, setStatus] = useState('Connexion a MQTT...');
+  const [commandStatus, setCommandStatus] = useState('Pret a envoyer');
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
@@ -27,22 +37,23 @@ function LedControlCard() {
       },
       (nextStatus) => {
         setStatus(nextStatus);
-      }
+      },
+      stateTopic
     );
 
     return () => {
       subscription.close();
     };
-  }, []);
+  }, [stateTopic]);
 
   async function handleToggle(nextEnabled: boolean) {
     try {
       setIsSending(true);
-      setCommandStatus(`Sending ${String(nextEnabled)}...`);
-      await publishLedCommand(nextEnabled);
-      setCommandStatus(`Command sent: ${String(nextEnabled)}`);
+      setCommandStatus(nextEnabled ? 'Envoi de la commande de verrouillage...' : 'Envoi de la commande de deverrouillage...');
+      await publishLedCommand(nextEnabled, commandTopic);
+      setCommandStatus(nextEnabled ? 'Commande de verrouillage envoyee.' : 'Commande de deverrouillage envoyee.');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to publish LED command.';
+      const message = error instanceof Error ? error.message : "Impossible d'envoyer la commande de porte.";
       setCommandStatus(message);
     } finally {
       setIsSending(false);
@@ -50,17 +61,21 @@ function LedControlCard() {
   }
 
   const isEnabled = ledState?.enabled ?? false;
-  const ledLabel = ledState ? (ledState.enabled ? 'ON' : 'OFF') : '--';
+  const doorLabel = ledState ? (ledState.enabled ? 'Verrouillee' : 'Deverrouillee') : '--';
 
   return (
     <article className="temperature-card led-card">
+      <div className="card-heading">
+        <p className="card-room">{roomName}</p>
+        <h3 className="card-title">Controle de porte</h3>
+      </div>
       <div className="card-topline">
-        <span className={status === 'Live' ? 'status-dot live' : 'status-dot'} />
+        <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Current LED state ${ledLabel}`}>
-        <span>{ledLabel}</span>
+      <div className="gauge" aria-label={`Etat actuel du controle de porte ${doorLabel}`}>
+        <span>{doorLabel}</span>
       </div>
 
       <div className="led-controls">
@@ -70,7 +85,7 @@ function LedControlCard() {
           onClick={() => handleToggle(false)}
           disabled={isSending}
         >
-          False
+          Deverrouiller
         </button>
         <button
           type="button"
@@ -78,7 +93,7 @@ function LedControlCard() {
           onClick={() => handleToggle(true)}
           disabled={isSending}
         >
-          True
+          Verrouiller
         </button>
       </div>
 
@@ -86,19 +101,19 @@ function LedControlCard() {
 
       <dl className="reading-meta">
         <div>
-          <dt>GPIO Pin</dt>
+          <dt>Broche GPIO</dt>
           <dd>{ledState?.pin ?? '--'}</dd>
         </div>
         <div>
-          <dt>State</dt>
-          <dd>{ledLabel}</dd>
+          <dt>Etat</dt>
+          <dd>{doorLabel}</dd>
         </div>
         <div>
           <dt>Source</dt>
-          <dd>{ledState?.source ?? 'MQTT command'}</dd>
+          <dd>{ledState?.source ?? 'Commande MQTT de porte'}</dd>
         </div>
         <div>
-          <dt>Updated</dt>
+          <dt>Mise a jour</dt>
           <dd>{formatTime(ledState?.recordedAtUtc)}</dd>
         </div>
       </dl>

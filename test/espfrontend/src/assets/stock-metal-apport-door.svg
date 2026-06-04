@@ -1,0 +1,30 @@
+<svg width="640" height="480" viewBox="0 0 640 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="480" rx="36" fill="#F3F7FB"/>
+  <rect x="38" y="34" width="564" height="412" rx="28" fill="url(#bg)"/>
+  <rect x="178" y="82" width="284" height="304" rx="24" fill="#273445"/>
+  <rect x="196" y="100" width="248" height="268" rx="18" fill="url(#door)"/>
+  <rect x="224" y="132" width="192" height="86" rx="14" fill="#E2E8F0" opacity="0.94"/>
+  <rect x="224" y="238" width="192" height="98" rx="14" fill="#64748B" opacity="0.28"/>
+  <circle cx="397" cy="242" r="10" fill="#F59E0B"/>
+  <rect x="124" y="112" width="34" height="248" rx="17" fill="#CBD5E1"/>
+  <rect x="482" y="112" width="34" height="248" rx="17" fill="#CBD5E1"/>
+  <rect x="72" y="60" width="204" height="58" rx="18" fill="#475569"/>
+  <text x="174" y="96" text-anchor="middle" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700">STOCK METAL D'APPORT</text>
+  <g opacity="0.95">
+    <rect x="492" y="88" width="18" height="54" rx="6" fill="#94A3B8"/>
+    <rect x="516" y="88" width="18" height="54" rx="6" fill="#94A3B8"/>
+    <rect x="540" y="88" width="18" height="54" rx="6" fill="#94A3B8"/>
+  </g>
+  <rect x="72" y="360" width="496" height="42" rx="21" fill="#E2E8F0"/>
+  <text x="320" y="430" text-anchor="middle" fill="#273445" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700">Stock Metal d'Apport</text>
+  <defs>
+    <linearGradient id="bg" x1="38" y1="34" x2="602" y2="446" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FAFCFF"/>
+      <stop offset="1" stop-color="#DCE6F2"/>
+    </linearGradient>
+    <linearGradient id="door" x1="196" y1="100" x2="444" y2="368" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8091A8"/>
+      <stop offset="1" stop-color="#4C5D73"/>
+    </linearGradient>
+  </defs>
+</svg>

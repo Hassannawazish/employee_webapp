@@ -14,12 +14,20 @@ No paid MQTT service is required.
 
 - Temperature card: latest internal ESP32 temperature reading
 - Rain card: latest digital rain / water sensor state
+- Gas card: latest digital gas / smoke sensor state
 - LED card: sends `true` / `false` MQTT commands and shows the last applied LED state
 
 The rain card displays:
 
 - `Wet` when `rainDetected` is `true`
 - `Dry` when `rainDetected` is `false`
+- The GPIO pin used by the sensor
+- The raw digital state from the module
+
+The gas card displays:
+
+- `Detected` when `gasDetected` is `true`
+- `Clear` when `gasDetected` is `false`
 - The GPIO pin used by the sensor
 - The raw digital state from the module
 
@@ -31,6 +39,7 @@ Raw MQTT URL for ESP32: 192.168.1.82:1884
 WebSocket URL for React: ws://localhost:9002
 Temperature topic: hassa/esp32-office/temperature
 Rain topic: hassa/esp32-office/rain
+Gas topic: hassa/esp32-office/gas
 LED command topic: hassa/esp32-office/led/command
 LED state topic: hassa/esp32-office/led/state
 Username/password: optional in frontend, supported through env vars
@@ -47,6 +56,7 @@ REACT_APP_MQTT_URL
 REACT_APP_MQTT_TEMPERATURE_TOPIC
 REACT_APP_MQTT_TOPIC
 REACT_APP_MQTT_RAIN_TOPIC
+REACT_APP_MQTT_GAS_TOPIC
 REACT_APP_MQTT_LED_COMMAND_TOPIC
 REACT_APP_MQTT_LED_STATE_TOPIC
 REACT_APP_MQTT_USERNAME
@@ -57,6 +67,7 @@ Notes:
 
 - `REACT_APP_MQTT_TOPIC` still works as a fallback for temperature.
 - Rain uses `REACT_APP_MQTT_RAIN_TOPIC`.
+- Gas uses `REACT_APP_MQTT_GAS_TOPIC`.
 
 ## Step 1: Run Mosquitto
 
@@ -145,6 +156,7 @@ Expected messages:
 ```json
 hassa/esp32-office/temperature {"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z","temperatureC":42.15}
 hassa/esp32-office/rain {"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z","rainDetected":true,"digitalState":0,"pin":13}
+hassa/esp32-office/gas {"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z","gasDetected":true,"digitalState":1,"pin":27}
 hassa/esp32-office/led/state {"deviceId":"esp32-office","recordedAtUtc":"2026-04-20T09:50:00Z","enabled":true,"pin":14,"source":"mqtt-command"}
 ```
 
@@ -192,6 +204,7 @@ If the browser is on another device, `localhost` will not point to your broker P
 $env:REACT_APP_MQTT_URL="ws://192.168.1.82:9002"
 $env:REACT_APP_MQTT_TEMPERATURE_TOPIC="hassa/esp32-office/temperature"
 $env:REACT_APP_MQTT_RAIN_TOPIC="hassa/esp32-office/rain"
+$env:REACT_APP_MQTT_GAS_TOPIC="hassa/esp32-office/gas"
 $env:REACT_APP_MQTT_LED_COMMAND_TOPIC="hassa/esp32-office/led/command"
 $env:REACT_APP_MQTT_LED_STATE_TOPIC="hassa/esp32-office/led/state"
 npm.cmd start
