@@ -15,6 +15,7 @@ type RoomDefinition = {
   description: string;
   doorAlt: string;
   doorCaption: string;
+  fixedDoorImageUrl?: string;
   doorVariant: 'generic' | 'chimique' | 'metal-apport';
   id: string;
   name: string;
@@ -41,6 +42,7 @@ const INITIAL_ROOMS: RoomDefinition[] = [
       "Surveillez les cinq capteurs et commandes en direct du stock chimique sur une seule vue. Suivez la temperature, le niveau de lumiere, l'etat de verrouillage de la porte, l'activite du detecteur de fumee et le controle d'acces pour proteger les produits sensibles.",
     doorAlt: 'Porte du stock chimique',
     doorCaption: "Vue de la porte du stock chimique reliee aux cinq flux de securite en direct.",
+    fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-chimique-room.jpg.jpeg`,
     doorVariant: 'chimique',
     summaryNote: 'Les cinq cartes de cette page affichent les donnees du stock chimique.',
     temperatureTopic: process.env.REACT_APP_ROOM_1_TEMPERATURE_TOPIC,
@@ -119,7 +121,7 @@ function getDoorImage(doorVariant: RoomDefinition['doorVariant']) {
 }
 
 function getActiveDoorImage(room: RoomDefinition) {
-  return room.customDoorImage ?? getDoorImage(room.doorVariant);
+  return room.fixedDoorImageUrl ?? room.customDoorImage ?? getDoorImage(room.doorVariant);
 }
 
 function openRoomImageDatabase(): Promise<IDBDatabase> {
@@ -221,7 +223,12 @@ function loadRooms() {
       return INITIAL_ROOMS;
     }
 
-    return parsedRooms;
+    const initialRoomById = new Map(INITIAL_ROOMS.map((room) => [room.id, room]));
+
+    return parsedRooms.map((room) => {
+      const initialRoom = initialRoomById.get(room.id);
+      return initialRoom ? { ...initialRoom, ...room } : room;
+    });
   } catch {
     return INITIAL_ROOMS;
   }
@@ -356,6 +363,7 @@ function App() {
   }
 
   const canRemoveRoom = rooms.length > MIN_ROOM_COUNT && !INITIAL_ROOMS.some((room) => room.id === activeRoom.id);
+  const canUploadDoorImage = !activeRoom.fixedDoorImageUrl;
 
   function handleDoorImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -399,7 +407,7 @@ function App() {
             </div>
             <div>
               <p className="eyebrow">SCAI Systems</p>
-              <h1>Centre de Commande des Capteurs de {activeRoom.name}</h1>
+              <h1>Surveillance de la Protection des Travailleurs</h1>
             </div>
           </div>
 
@@ -458,18 +466,20 @@ function App() {
           <figure className="room-door-card">
             <img className="room-door-image" src={getActiveDoorImage(activeRoom)} alt={activeRoom.doorAlt} />
             <figcaption>{activeRoom.doorCaption}</figcaption>
-            <div className="door-upload-actions">
-              <label className="door-upload-button" htmlFor={`door-upload-${activeRoom.id}`}>
-                Televerser une image
-              </label>
-              <input
-                id={`door-upload-${activeRoom.id}`}
-                className="door-upload-input"
-                type="file"
-                accept="image/*"
-                onChange={handleDoorImageUpload}
-              />
-            </div>
+            {canUploadDoorImage ? (
+              <div className="door-upload-actions">
+                <label className="door-upload-button" htmlFor={`door-upload-${activeRoom.id}`}>
+                  Televerser une image
+                </label>
+                <input
+                  id={`door-upload-${activeRoom.id}`}
+                  className="door-upload-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleDoorImageUpload}
+                />
+              </div>
+            ) : null}
           </figure>
 
           <div className="monitor-note">
