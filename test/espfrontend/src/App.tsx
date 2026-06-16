@@ -5,6 +5,7 @@ import roomDoor from './assets/room-one-door.svg';
 import stockChimiqueDoor from './assets/stock-chimique-door.svg';
 import stockMetalApportDoor from './assets/stock-metal-apport-door.svg';
 import GasCard from './components/GasCard/GasCard';
+import HumidityCard from './components/HumidityCard/HumidityCard';
 import LightCard from './components/LightCard/LightCard';
 import MaterialTestingCard from './components/MaterialTestingCard/MaterialTestingCard';
 import LedControlCard from './components/LedControlCard/LedControlCard';
@@ -25,6 +26,7 @@ type RoomDefinition = {
   summaryNote: string;
   temperatureTopic?: string;
   lightTopic?: string;
+  humidityTopic?: string;
   rainTopic?: string;
   gasTopic?: string;
   ledCommandTopic?: string;
@@ -41,15 +43,16 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     name: 'Stock chimique',
     pagePath: '/rooms/room-1',
     description:
-      "Surveillez les cinq capteurs, les commandes en direct et le controle de test des materiaux du stock chimique sur une seule vue. Suivez la temperature, le niveau de lumiere, l'etat de verrouillage de la porte, l'activite du detecteur de fumee et le controle d'acces pour proteger les produits sensibles.",
+      "Surveillez les six capteurs, les commandes en direct et le controle de test des materiaux du stock chimique sur une seule vue. Suivez la temperature, le niveau de lumiere, l'humidite, l'etat de verrouillage de la porte, l'activite du detecteur de fumee et le controle d'acces pour proteger les produits sensibles.",
     hasMaterialTesting: true,
     doorAlt: 'Porte du stock chimique',
-    doorCaption: "Vue de la porte du stock chimique reliee aux cinq flux de securite en direct.",
+    doorCaption: "Vue de la porte du stock chimique reliee aux six flux de securite en direct.",
     fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-chimique-room.jpg.jpeg`,
     doorVariant: 'chimique',
-    summaryNote: 'Les six cartes de cette page affichent les donnees du stock chimique.',
+    summaryNote: 'Les sept cartes de cette page affichent les donnees du stock chimique.',
     temperatureTopic: process.env.REACT_APP_ROOM_1_TEMPERATURE_TOPIC,
     lightTopic: process.env.REACT_APP_ROOM_1_LIGHT_TOPIC,
+    humidityTopic: process.env.REACT_APP_ROOM_1_HUMIDITY_TOPIC,
     rainTopic: process.env.REACT_APP_ROOM_1_RAIN_TOPIC,
     gasTopic: process.env.REACT_APP_ROOM_1_GAS_TOPIC,
     ledCommandTopic: process.env.REACT_APP_ROOM_1_LED_COMMAND_TOPIC,
@@ -60,13 +63,14 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     name: "Stock metal d'apport",
     pagePath: '/rooms/room-2',
     description:
-      "Gardez le stock metal d'apport sur sa propre page dediee afin que les cartes de temperature, lumiere, verrouillage, fumee et controle de porte restent concentrees sur cette zone de stockage technique.",
+      "Gardez le stock metal d'apport sur sa propre page dediee afin que les cartes de temperature, lumiere, humidite, verrouillage, fumee et controle de porte restent concentrees sur cette zone de stockage technique.",
     doorAlt: "Porte du stock metal d'apport",
-    doorCaption: "Vue de la porte du stock metal d'apport reliee aux cinq flux de surveillance en direct.",
+    doorCaption: "Vue de la porte du stock metal d'apport reliee aux six flux de surveillance en direct.",
     doorVariant: 'metal-apport',
-    summaryNote: "Les cinq cartes de cette page affichent les donnees du stock metal d'apport.",
+    summaryNote: "Les six cartes de cette page affichent les donnees du stock metal d'apport.",
     temperatureTopic: process.env.REACT_APP_ROOM_2_TEMPERATURE_TOPIC,
     lightTopic: process.env.REACT_APP_ROOM_2_LIGHT_TOPIC,
+    humidityTopic: process.env.REACT_APP_ROOM_2_HUMIDITY_TOPIC,
     rainTopic: process.env.REACT_APP_ROOM_2_RAIN_TOPIC,
     gasTopic: process.env.REACT_APP_ROOM_2_GAS_TOPIC,
     ledCommandTopic: process.env.REACT_APP_ROOM_2_LED_COMMAND_TOPIC,
@@ -77,13 +81,14 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     name: 'Salle 3',
     pagePath: '/rooms/room-3',
     description:
-      'Utilisez la page de la Salle 3 pour suivre la temperature, la lumiere, le verrouillage de porte, la fumee et le controle de porte sans les melanger avec les autres salles.',
+      "Utilisez la page de la Salle 3 pour suivre la temperature, la lumiere, l'humidite, le verrouillage de porte, la fumee et le controle de porte sans les melanger avec les autres salles.",
     doorAlt: 'Porte de la Salle 3',
-    doorCaption: "Vue de l'entree de la Salle 3 liee aux cinq flux en direct.",
+    doorCaption: "Vue de l'entree de la Salle 3 liee aux six flux en direct.",
     doorVariant: 'generic',
-    summaryNote: 'Les cinq cartes de cette page affichent les donnees de la Salle 3.',
+    summaryNote: 'Les six cartes de cette page affichent les donnees de la Salle 3.',
     temperatureTopic: process.env.REACT_APP_ROOM_3_TEMPERATURE_TOPIC,
     lightTopic: process.env.REACT_APP_ROOM_3_LIGHT_TOPIC,
+    humidityTopic: process.env.REACT_APP_ROOM_3_HUMIDITY_TOPIC,
     rainTopic: process.env.REACT_APP_ROOM_3_RAIN_TOPIC,
     gasTopic: process.env.REACT_APP_ROOM_3_GAS_TOPIC,
     ledCommandTopic: process.env.REACT_APP_ROOM_3_LED_COMMAND_TOPIC,
@@ -94,13 +99,14 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     name: 'Salle 4',
     pagePath: '/rooms/room-4',
     description:
-      'Ouvrez la page de la Salle 4 pour consulter les cinq memes systemes de salle sur une page web dediee a cette salle.',
+      'Ouvrez la page de la Salle 4 pour consulter les six memes systemes de salle sur une page web dediee a cette salle.',
     doorAlt: 'Porte de la Salle 4',
-    doorCaption: "Vue de l'entree de la Salle 4 liee aux cinq flux en direct.",
+    doorCaption: "Vue de l'entree de la Salle 4 liee aux six flux en direct.",
     doorVariant: 'generic',
-    summaryNote: 'Les cinq cartes de cette page affichent les donnees de la Salle 4.',
+    summaryNote: 'Les six cartes de cette page affichent les donnees de la Salle 4.',
     temperatureTopic: process.env.REACT_APP_ROOM_4_TEMPERATURE_TOPIC,
     lightTopic: process.env.REACT_APP_ROOM_4_LIGHT_TOPIC,
+    humidityTopic: process.env.REACT_APP_ROOM_4_HUMIDITY_TOPIC,
     rainTopic: process.env.REACT_APP_ROOM_4_RAIN_TOPIC,
     gasTopic: process.env.REACT_APP_ROOM_4_GAS_TOPIC,
     ledCommandTopic: process.env.REACT_APP_ROOM_4_LED_COMMAND_TOPIC,
@@ -330,11 +336,11 @@ function App() {
       name: `Salle ${nextIndex}`,
       pagePath: `/rooms/room-${nextIndex}`,
       description:
-        `Surveillez les cinq capteurs et commandes en direct de la Salle ${nextIndex} sur une page dediee. Suivez la temperature, la lumiere, le verrouillage de la porte, la fumee et le controle de porte pour cette salle.`,
+        `Surveillez les six capteurs et commandes en direct de la Salle ${nextIndex} sur une page dediee. Suivez la temperature, la lumiere, l'humidite, le verrouillage de la porte, la fumee et le controle de porte pour cette salle.`,
       doorAlt: `Porte de la Salle ${nextIndex}`,
-      doorCaption: `Vue de l'entree de la Salle ${nextIndex} liee aux cinq flux en direct.`,
+      doorCaption: `Vue de l'entree de la Salle ${nextIndex} liee aux six flux en direct.`,
       doorVariant: 'generic',
-      summaryNote: `Les cinq cartes de cette page affichent les donnees de la Salle ${nextIndex}.`
+      summaryNote: `Les six cartes de cette page affichent les donnees de la Salle ${nextIndex}.`
     };
 
     setRooms((currentRooms) => [...currentRooms, nextRoom]);
@@ -457,7 +463,7 @@ function App() {
             </div>
             <div className="highlight-chip">
               <span className="highlight-label">Systemes</span>
-              <strong>{activeRoom.hasMaterialTesting ? '6 systemes de salle' : '5 systemes de salle'}</strong>
+              <strong>{activeRoom.hasMaterialTesting ? '7 systemes de salle' : '6 systemes de salle'}</strong>
             </div>
             <div className="highlight-chip">
               <span className="highlight-label">Transport</span>
@@ -494,7 +500,7 @@ function App() {
             <h2>Capteurs de {activeRoom.name}</h2>
             <p>
               Cette page dediee est reservee aux cartes Temperature, Capteur de
-              lumiere, Etat du verrouillage de la porte, Detecteur de fumee et
+              lumiere, Capteur d'humidite, Etat du verrouillage de la porte, Detecteur de fumee et
               Controle de porte attribuees a {activeRoom.name}
               {activeRoom.hasMaterialTesting ? ', ainsi qu au module de test des materiaux.' : '.'}
             </p>
@@ -503,6 +509,7 @@ function App() {
           <div className="sensor-grid">
             <TemperatureCard roomName={activeRoom.name} topic={activeRoom.temperatureTopic} />
             <LightCard roomName={activeRoom.name} topic={activeRoom.lightTopic} />
+            <HumidityCard roomName={activeRoom.name} topic={activeRoom.humidityTopic} />
             <RainCard roomName={activeRoom.name} topic={activeRoom.rainTopic} />
             <GasCard roomName={activeRoom.name} topic={activeRoom.gasTopic} />
             <LedControlCard

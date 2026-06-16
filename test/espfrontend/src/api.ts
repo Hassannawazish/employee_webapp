@@ -13,6 +13,12 @@ export type LightReading = {
   recordedAtUtc: string;
 };
 
+export type HumidityReading = {
+  humidityPercent: number;
+  deviceId: string;
+  recordedAtUtc: string;
+};
+
 export type RainReading = {
   rainDetected: boolean;
   digitalState: number;
@@ -47,6 +53,7 @@ const temperatureTopic =
   process.env.REACT_APP_MQTT_TOPIC ??
   'hassa/esp32-office/temperature';
 const lightTopic = process.env.REACT_APP_MQTT_LIGHT_TOPIC ?? 'hassa/esp32-office/light';
+const humidityTopic = process.env.REACT_APP_MQTT_HUMIDITY_TOPIC ?? 'hassa/esp32-office/humidity';
 const rainTopic = process.env.REACT_APP_MQTT_RAIN_TOPIC ?? 'hassa/esp32-office/rain';
 const gasTopic = process.env.REACT_APP_MQTT_GAS_TOPIC ?? 'hassa/esp32-office/gas';
 const ledCommandTopic =
@@ -159,6 +166,22 @@ export function subscribeToLightSensor(
       topic,
       waitingStatus: 'En attente de la mesure du capteur de lumiere...',
       invalidPayloadStatus: 'Mesure du capteur de lumiere recue invalide.'
+    },
+    onReading,
+    onStatus
+  );
+}
+
+export function subscribeToHumiditySensor(
+  onReading: (reading: HumidityReading) => void,
+  onStatus: (status: string) => void,
+  topic = humidityTopic
+): TemperatureSubscription {
+  return subscribeToSensor<HumidityReading>(
+    {
+      topic,
+      waitingStatus: "En attente de la mesure d'humidite...",
+      invalidPayloadStatus: "Mesure d'humidite recue invalide."
     },
     onReading,
     onStatus
