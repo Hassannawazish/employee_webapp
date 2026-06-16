@@ -6,11 +6,13 @@ import stockChimiqueDoor from './assets/stock-chimique-door.svg';
 import stockMetalApportDoor from './assets/stock-metal-apport-door.svg';
 import GasCard from './components/GasCard/GasCard';
 import LightCard from './components/LightCard/LightCard';
+import MaterialTestingCard from './components/MaterialTestingCard/MaterialTestingCard';
 import LedControlCard from './components/LedControlCard/LedControlCard';
 import RainCard from './components/RainCard/RainCard';
 import TemperatureCard from './components/TemperatureCard/TemperatureCard';
 
 type RoomDefinition = {
+  hasMaterialTesting?: boolean;
   customDoorImage?: string;
   description: string;
   doorAlt: string;
@@ -39,12 +41,13 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     name: 'Stock chimique',
     pagePath: '/rooms/room-1',
     description:
-      "Surveillez les cinq capteurs et commandes en direct du stock chimique sur une seule vue. Suivez la temperature, le niveau de lumiere, l'etat de verrouillage de la porte, l'activite du detecteur de fumee et le controle d'acces pour proteger les produits sensibles.",
+      "Surveillez les cinq capteurs, les commandes en direct et le controle de test des materiaux du stock chimique sur une seule vue. Suivez la temperature, le niveau de lumiere, l'etat de verrouillage de la porte, l'activite du detecteur de fumee et le controle d'acces pour proteger les produits sensibles.",
+    hasMaterialTesting: true,
     doorAlt: 'Porte du stock chimique',
     doorCaption: "Vue de la porte du stock chimique reliee aux cinq flux de securite en direct.",
     fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-chimique-room.jpg.jpeg`,
     doorVariant: 'chimique',
-    summaryNote: 'Les cinq cartes de cette page affichent les donnees du stock chimique.',
+    summaryNote: 'Les six cartes de cette page affichent les donnees du stock chimique.',
     temperatureTopic: process.env.REACT_APP_ROOM_1_TEMPERATURE_TOPIC,
     lightTopic: process.env.REACT_APP_ROOM_1_LIGHT_TOPIC,
     rainTopic: process.env.REACT_APP_ROOM_1_RAIN_TOPIC,
@@ -121,7 +124,7 @@ function getDoorImage(doorVariant: RoomDefinition['doorVariant']) {
 }
 
 function getActiveDoorImage(room: RoomDefinition) {
-  return room.fixedDoorImageUrl ?? room.customDoorImage ?? getDoorImage(room.doorVariant);
+  return room.customDoorImage ?? room.fixedDoorImageUrl ?? getDoorImage(room.doorVariant);
 }
 
 function openRoomImageDatabase(): Promise<IDBDatabase> {
@@ -363,7 +366,6 @@ function App() {
   }
 
   const canRemoveRoom = rooms.length > MIN_ROOM_COUNT && !INITIAL_ROOMS.some((room) => room.id === activeRoom.id);
-  const canUploadDoorImage = !activeRoom.fixedDoorImageUrl;
 
   function handleDoorImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -455,7 +457,7 @@ function App() {
             </div>
             <div className="highlight-chip">
               <span className="highlight-label">Systemes</span>
-              <strong>5 systemes de salle</strong>
+              <strong>{activeRoom.hasMaterialTesting ? '6 systemes de salle' : '5 systemes de salle'}</strong>
             </div>
             <div className="highlight-chip">
               <span className="highlight-label">Transport</span>
@@ -466,20 +468,18 @@ function App() {
           <figure className="room-door-card">
             <img className="room-door-image" src={getActiveDoorImage(activeRoom)} alt={activeRoom.doorAlt} />
             <figcaption>{activeRoom.doorCaption}</figcaption>
-            {canUploadDoorImage ? (
-              <div className="door-upload-actions">
-                <label className="door-upload-button" htmlFor={`door-upload-${activeRoom.id}`}>
-                  Televerser une image
-                </label>
-                <input
-                  id={`door-upload-${activeRoom.id}`}
-                  className="door-upload-input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleDoorImageUpload}
-                />
-              </div>
-            ) : null}
+            <div className="door-upload-actions">
+              <label className="door-upload-button" htmlFor={`door-upload-${activeRoom.id}`}>
+                Televerser une image
+              </label>
+              <input
+                id={`door-upload-${activeRoom.id}`}
+                className="door-upload-input"
+                type="file"
+                accept="image/*"
+                onChange={handleDoorImageUpload}
+              />
+            </div>
           </figure>
 
           <div className="monitor-note">
@@ -495,7 +495,8 @@ function App() {
             <p>
               Cette page dediee est reservee aux cartes Temperature, Capteur de
               lumiere, Etat du verrouillage de la porte, Detecteur de fumee et
-              Controle de porte attribuees a {activeRoom.name}.
+              Controle de porte attribuees a {activeRoom.name}
+              {activeRoom.hasMaterialTesting ? ', ainsi qu au module de test des materiaux.' : '.'}
             </p>
           </div>
 
@@ -510,6 +511,11 @@ function App() {
               stateTopic={activeRoom.ledStateTopic}
             />
           </div>
+          {activeRoom.hasMaterialTesting ? (
+            <div className="material-testing-section">
+              <MaterialTestingCard roomName={activeRoom.name} />
+            </div>
+          ) : null}
         </div>
       </section>
     </main>

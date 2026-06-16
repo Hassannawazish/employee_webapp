@@ -29,7 +29,10 @@ test('renders the default room dashboard', () => {
   expect(screen.getByText(/etat du verrouillage de la porte/i)).toBeInTheDocument();
   expect(screen.getByText(/detecteur de fumee/i)).toBeInTheDocument();
   expect(screen.getByText(/controle de porte/i)).toBeInTheDocument();
-  expect(screen.queryByText(/televerser une image/i)).not.toBeInTheDocument();
+  expect(screen.getByText(/test des materiaux/i)).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /ouvrir la camera/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /prendre une image/i })).toBeInTheDocument();
+  expect(screen.getByText(/televerser une image/i)).toBeInTheDocument();
   expect(screen.getAllByText(/connexion a mqtt/i)).toHaveLength(5);
 });
 
@@ -46,6 +49,7 @@ test('switches to a dedicated page for another room', async () => {
   expect(screen.getByAltText(/porte de la salle 4/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^salle 4$/i })).toHaveAttribute('aria-current', 'page');
   expect(screen.getByText(/televerser une image/i)).toBeInTheDocument();
+  expect(screen.queryByText(/test des materiaux/i)).not.toBeInTheDocument();
   expect(screen.getAllByText(/^salle 4$/i)).toHaveLength(7);
 });
 

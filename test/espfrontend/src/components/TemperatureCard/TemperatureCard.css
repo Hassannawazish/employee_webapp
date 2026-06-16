@@ -1,10 +1,10 @@
 .temperature-card {
-  min-height: 280px;
+  min-height: 245px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 14px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
@@ -64,7 +64,7 @@
 .card-room {
   margin: 0;
   color: #0369a1;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -73,17 +73,17 @@
 .card-title {
   margin: 0;
   color: #0f172a;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   line-height: 1.2;
 }
 
 .card-topline {
-  min-height: 20px;
+  min-height: 18px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #334155;
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
@@ -102,8 +102,8 @@
 }
 
 .gauge {
-  width: 126px;
-  height: 126px;
+  width: 112px;
+  height: 112px;
   display: grid;
   place-items: center;
   align-self: center;
@@ -115,7 +115,7 @@
 
 .gauge span {
   color: #0f172a;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   text-align: center;
   overflow-wrap: anywhere;
@@ -135,16 +135,16 @@
 .led-controls {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
 }
 
 .led-button {
-  min-height: 38px;
+  min-height: 34px;
   border: 1px solid #fcd34d;
   border-radius: 999px;
   background: #fefce8;
   color: #854d0e;
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 800;
   cursor: pointer;
   transition:
@@ -173,19 +173,19 @@
 .command-status {
   margin: -2px 0 0;
   color: #854d0e;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
 .reading-meta div {
   min-width: 0;
-  padding-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid #e2e8f0;
 }
 
 .reading-meta dt {
   color: #64748b;
-  font-size: 0.64rem;
+  font-size: 0.58rem;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -193,24 +193,24 @@
 .reading-meta dd {
   margin: 4px 0 0;
   color: #111827;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
 @media (max-width: 420px) {
   .temperature-card {
-    min-height: 300px;
-    padding: 16px;
+    min-height: 260px;
+    padding: 14px;
   }
 
   .gauge {
-    width: 122px;
-    height: 122px;
+    width: 108px;
+    height: 108px;
   }
 
   .gauge span {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .reading-meta {
