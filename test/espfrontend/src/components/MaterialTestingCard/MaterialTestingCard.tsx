@@ -415,14 +415,13 @@ function buildModelDetectionResult(detection: ModelDetection | undefined): Detec
   }
 
   const placement = getPlacementForHazardLabel(detection.label);
-  const confidencePercent = Math.round(detection.confidence * 100);
   const direction = placement === 'right' ? 'cote droit' : 'cote gauche';
 
   return {
     confidence: detection.confidence,
     detected: true,
     label: detection.label,
-    message: `${detection.label} detecte avec ${confidencePercent}% de confiance. Veuillez placer le materiau sur le ${direction}.`,
+    message: `${detection.label} detecte. Veuillez placer le materiau sur le ${direction}.`,
     placement,
     source: 'yolo-model'
   };

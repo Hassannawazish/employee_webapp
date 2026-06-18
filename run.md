@@ -177,3 +177,7 @@ python .\ml\serve_hazard_detector.py
 If Arduino cannot find `WiFi.h`, select an ESP32 board in Arduino IDE and install `esp32 by Espressif Systems` from Boards Manager.
 
 If Arduino cannot find `DHT.h`, install `DHT sensor library by Adafruit` and `Adafruit Unified Sensor` from Library Manager.
+
+
+
+dataset link : https://universe.roboflow.com/teawza007/hazard-symbols/dataset/15
