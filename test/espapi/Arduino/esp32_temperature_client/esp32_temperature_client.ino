@@ -13,7 +13,6 @@ const int mqttPort = 1884;
 const char* temperatureTopic = "hassa/esp32-office/temperature";
 const char* lightTopic = "hassa/esp32-office/light";
 const char* humidityTopic = "hassa/esp32-office/humidity";
-const char* rainTopic = "hassa/esp32-office/rain";
 const char* gasTopic = "hassa/esp32-office/gas";
 const char* ledCommandTopic = "hassa/esp32-office/led/command";
 const char* ledStateTopic = "hassa/esp32-office/led/state";
@@ -21,18 +20,13 @@ const char* mqttClientId = "esp32-office-sensor-publisher";
 const char* mqttUsername = "esp32";
 const char* mqttPassword = "CHANGE_ME_MQTT_PASSWORD";
 
-// DHT11/DHT22 sensor for temperature + humidity.
+// DHT11 sensor for temperature + humidity.
 const int dhtPin = 4;
-#define DHT_TYPE DHT22
+#define DHT_TYPE DHT11
 
 // Analog light sensor / LDR output. Use ADC1 pins while WiFi is enabled.
 const int lightSensorPin = 34;
 const bool lightSensorBrighterWhenHigh = true;
-
-// Digital door-lock sensor. The UI still consumes this on the "rain" topic.
-const int rainSensorPin = 13;
-// Many magnetic/reed/rain modules pull LOW when active.
-const bool rainDetectedStateIsLow = true;
 
 // Digital smoke/gas module output.
 const int gasSensorPin = 27;
@@ -131,8 +125,6 @@ void connectToMqtt() {
       Serial.println(lightTopic);
       Serial.print("Publishing humidity topic: ");
       Serial.println(humidityTopic);
-      Serial.print("Publishing door-lock topic: ");
-      Serial.println(rainTopic);
       Serial.print("Publishing gas topic: ");
       Serial.println(gasTopic);
       Serial.print("Listening for LED commands on: ");
@@ -262,29 +254,6 @@ void publishGasSensor() {
   }
 }
 
-void publishRainSensor() {
-  int digitalState = digitalRead(rainSensorPin);
-  bool rainDetected = rainDetectedStateIsLow ? digitalState == LOW : digitalState == HIGH;
-
-  String payload = basePayload();
-  payload += ",\"rainDetected\":";
-  payload += rainDetected ? "true" : "false";
-  payload += ",\"digitalState\":";
-  payload += String(digitalState);
-  payload += ",\"pin\":";
-  payload += String(rainSensorPin);
-  payload += "}";
-
-  bool published = mqttClient.publish(rainTopic, payload.c_str(), true);
-
-  if (published) {
-    Serial.print("Published rain sensor: ");
-    Serial.println(payload);
-  } else {
-    Serial.println("Failed to publish rain sensor.");
-  }
-}
-
 void publishLedState(const char* source) {
   String payload = basePayload();
   payload += ",\"enabled\":";
@@ -309,7 +278,6 @@ void setup() {
   Serial.begin(115200);
   dht.begin();
   analogReadResolution(12);
-  pinMode(rainSensorPin, INPUT);
   pinMode(gasSensorPin, INPUT);
   pinMode(ledPin, OUTPUT);
   applyLedState(false, "startup");
@@ -335,7 +303,6 @@ void loop() {
     lastPublishAt = millis();
     publishTemperatureAndHumidity();
     publishLightSensor();
-    publishRainSensor();
     publishGasSensor();
   }
 }
