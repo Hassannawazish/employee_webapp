@@ -6,9 +6,23 @@ type MaterialTestingCardProps = {
 };
 
 type DetectionResult = {
+  confidence?: number;
   detected: boolean;
+  label?: string;
   message: string;
   placement: 'left' | 'right' | null;
+  source?: 'browser-fallback' | 'yolo-model';
+};
+
+type ModelDetection = {
+  box: {
+    x1: number;
+    x2: number;
+    y1: number;
+    y2: number;
+  };
+  confidence: number;
+  label: string;
 };
 
 type TemplateMask = {
@@ -18,6 +32,8 @@ type TemplateMask = {
 
 const TEMPLATE_SIZE = 40;
 const RIGHT_SIDE_MATCH_THRESHOLD = 0.34;
+const HAZARD_DETECTION_URL = process.env.REACT_APP_HAZARD_DETECTION_URL;
+const LEFT_SIDE_HAZARD_LABEL = 'Skull and Crossbones';
 
 const TEMPLATE_URLS: Array<{ name: TemplateMask['name']; url: string }> = [
   {
@@ -309,7 +325,8 @@ function analyzeHazardSign(imageData: ImageData, templates: TemplateMask[]): Det
     return {
       detected: false,
       message: 'Vous devez demander au responsable',
-      placement: null
+      placement: null,
+      source: 'browser-fallback'
     };
   }
 
@@ -328,7 +345,8 @@ function analyzeHazardSign(imageData: ImageData, templates: TemplateMask[]): Det
     return {
       detected: true,
       message: 'Veuillez placer le materiau sur le cote droit',
-      placement: 'right'
+      placement: 'right',
+      source: 'browser-fallback'
     };
   }
 
@@ -358,7 +376,8 @@ function analyzeHazardSign(imageData: ImageData, templates: TemplateMask[]): Det
       return {
         detected: true,
         message: 'Veuillez placer le materiau sur le cote droit',
-        placement: 'right'
+        placement: 'right',
+        source: 'browser-fallback'
       };
     }
   }
@@ -368,15 +387,68 @@ function analyzeHazardSign(imageData: ImageData, templates: TemplateMask[]): Det
     return {
       detected: false,
       message: 'Vous devez demander au responsable',
-      placement: null
+      placement: null,
+      source: 'browser-fallback'
     };
   }
 
   return {
     detected: true,
     message: 'Veuillez placer le materiau sur le cote gauche',
-    placement: 'left'
+    placement: 'left',
+    source: 'browser-fallback'
   };
+}
+
+function getPlacementForHazardLabel(label: string): DetectionResult['placement'] {
+  return label === LEFT_SIDE_HAZARD_LABEL ? 'left' : 'right';
+}
+
+function buildModelDetectionResult(detection: ModelDetection | undefined): DetectionResult {
+  if (!detection) {
+    return {
+      detected: false,
+      message: 'Aucun pictogramme reconnu par le modele. Vous devez demander au responsable',
+      placement: null,
+      source: 'yolo-model'
+    };
+  }
+
+  const placement = getPlacementForHazardLabel(detection.label);
+  const confidencePercent = Math.round(detection.confidence * 100);
+  const direction = placement === 'right' ? 'cote droit' : 'cote gauche';
+
+  return {
+    confidence: detection.confidence,
+    detected: true,
+    label: detection.label,
+    message: `${detection.label} detecte avec ${confidencePercent}% de confiance. Veuillez placer le materiau sur le ${direction}.`,
+    placement,
+    source: 'yolo-model'
+  };
+}
+
+async function detectHazardSignWithModel(snapshotUrl: string): Promise<DetectionResult | null> {
+  if (!HAZARD_DETECTION_URL) {
+    return null;
+  }
+
+  const response = await fetch(`${HAZARD_DETECTION_URL.replace(/\/$/, '')}/detect`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      image: snapshotUrl
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('Hazard detector request failed.');
+  }
+
+  const payload = (await response.json()) as { detections?: ModelDetection[] };
+  return buildModelDetectionResult(payload.detections?.[0]);
 }
 
 function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
@@ -436,7 +508,7 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
     void openCamera();
   }
 
-  function captureImage() {
+  async function captureImage() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.videoWidth === 0 || video.videoHeight === 0) {
@@ -456,10 +528,23 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
     }
 
     context.drawImage(video, 0, 0, targetWidth, targetHeight);
+    const nextSnapshotUrl = canvas.toDataURL('image/png');
     const imageData = context.getImageData(0, 0, targetWidth, targetHeight);
-    const detection = analyzeHazardSign(imageData, templates);
 
-    setSnapshotUrl(canvas.toDataURL('image/png'));
+    let detection = analyzeHazardSign(imageData, templates);
+    if (HAZARD_DETECTION_URL) {
+      setResultMessage('Analyse du pictogramme avec le modele YOLO...');
+      try {
+        detection = (await detectHazardSignWithModel(nextSnapshotUrl)) ?? detection;
+      } catch {
+        detection = {
+          ...detection,
+          message: `${detection.message} (modele YOLO indisponible, analyse locale utilisee).`
+        };
+      }
+    }
+
+    setSnapshotUrl(nextSnapshotUrl);
     setResultMessage(detection.message);
     setPlacementImage(
       detection.placement

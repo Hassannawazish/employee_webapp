@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <DHT.h>
 #include <time.h>
 
 const char* ssid = "Bbox-5BDE03F7-Plus";
@@ -10,22 +11,39 @@ const char* deviceId = "esp32-office";
 const char* mqttServer = "192.168.1.82";
 const int mqttPort = 1884;
 const char* temperatureTopic = "hassa/esp32-office/temperature";
+const char* lightTopic = "hassa/esp32-office/light";
+const char* humidityTopic = "hassa/esp32-office/humidity";
 const char* rainTopic = "hassa/esp32-office/rain";
+const char* gasTopic = "hassa/esp32-office/gas";
 const char* ledCommandTopic = "hassa/esp32-office/led/command";
 const char* ledStateTopic = "hassa/esp32-office/led/state";
-const char* mqttClientId = "esp32-office-temperature-publisher";
+const char* mqttClientId = "esp32-office-sensor-publisher";
 const char* mqttUsername = "esp32";
 const char* mqttPassword = "CHANGE_ME_MQTT_PASSWORD";
 
-// Update this pin to match the ESP32 GPIO where the rain/water sensor D0 pin is connected.
+// DHT11/DHT22 sensor for temperature + humidity.
+const int dhtPin = 4;
+#define DHT_TYPE DHT22
+
+// Analog light sensor / LDR output. Use ADC1 pins while WiFi is enabled.
+const int lightSensorPin = 34;
+const bool lightSensorBrighterWhenHigh = true;
+
+// Digital door-lock sensor. The UI still consumes this on the "rain" topic.
 const int rainSensorPin = 13;
-// Many digital rain modules pull LOW when water is detected.
+// Many magnetic/reed/rain modules pull LOW when active.
 const bool rainDetectedStateIsLow = true;
-// Update this pin to the GPIO used by your LED.
+
+// Digital smoke/gas module output.
+const int gasSensorPin = 27;
+const bool gasDetectedStateIsLow = false;
+
+// Door-control relay/LED output.
 const int ledPin = 14;
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
+DHT dht(dhtPin, DHT_TYPE);
 
 unsigned long lastPublishAt = 0;
 const unsigned long publishIntervalMs = 5000;
@@ -109,8 +127,14 @@ void connectToMqtt() {
       Serial.println("connected.");
       Serial.print("Publishing temperature topic: ");
       Serial.println(temperatureTopic);
-      Serial.print("Publishing rain topic: ");
+      Serial.print("Publishing light topic: ");
+      Serial.println(lightTopic);
+      Serial.print("Publishing humidity topic: ");
+      Serial.println(humidityTopic);
+      Serial.print("Publishing door-lock topic: ");
       Serial.println(rainTopic);
+      Serial.print("Publishing gas topic: ");
+      Serial.println(gasTopic);
       Serial.print("Listening for LED commands on: ");
       Serial.println(ledCommandTopic);
       if (mqttClient.subscribe(ledCommandTopic, 1)) {
@@ -138,11 +162,9 @@ String basePayload() {
   return payload;
 }
 
-void publishTemperature() {
-  float temperatureC = temperatureRead();
-
+void publishTemperature(float temperatureC) {
   if (isnan(temperatureC)) {
-    Serial.println("Failed to read ESP32 internal temperature.");
+    Serial.println("Failed to read DHT temperature.");
     return;
   }
 
@@ -158,6 +180,85 @@ void publishTemperature() {
     Serial.println(payload);
   } else {
     Serial.println("Failed to publish temperature.");
+  }
+}
+
+void publishHumidity(float humidityPercent) {
+  if (isnan(humidityPercent)) {
+    Serial.println("Failed to read DHT humidity.");
+    return;
+  }
+
+  String payload = basePayload();
+  payload += ",\"humidityPercent\":";
+  payload += String(humidityPercent, 2);
+  payload += "}";
+
+  bool published = mqttClient.publish(humidityTopic, payload.c_str(), true);
+
+  if (published) {
+    Serial.print("Published humidity: ");
+    Serial.println(payload);
+  } else {
+    Serial.println("Failed to publish humidity.");
+  }
+}
+
+void publishTemperatureAndHumidity() {
+  float humidityPercent = dht.readHumidity();
+  float temperatureC = dht.readTemperature();
+
+  publishTemperature(temperatureC);
+  publishHumidity(humidityPercent);
+}
+
+void publishLightSensor() {
+  int rawLight = analogRead(lightSensorPin);
+  int normalizedLight = lightSensorBrighterWhenHigh
+    ? map(rawLight, 0, 4095, 0, 1000)
+    : map(rawLight, 0, 4095, 1000, 0);
+
+  normalizedLight = constrain(normalizedLight, 0, 1000);
+
+  String payload = basePayload();
+  payload += ",\"lightLevel\":";
+  payload += String(normalizedLight);
+  payload += ",\"rawAnalog\":";
+  payload += String(rawLight);
+  payload += ",\"pin\":";
+  payload += String(lightSensorPin);
+  payload += "}";
+
+  bool published = mqttClient.publish(lightTopic, payload.c_str(), true);
+
+  if (published) {
+    Serial.print("Published light sensor: ");
+    Serial.println(payload);
+  } else {
+    Serial.println("Failed to publish light sensor.");
+  }
+}
+
+void publishGasSensor() {
+  int digitalState = digitalRead(gasSensorPin);
+  bool gasDetected = gasDetectedStateIsLow ? digitalState == LOW : digitalState == HIGH;
+
+  String payload = basePayload();
+  payload += ",\"gasDetected\":";
+  payload += gasDetected ? "true" : "false";
+  payload += ",\"digitalState\":";
+  payload += String(digitalState);
+  payload += ",\"pin\":";
+  payload += String(gasSensorPin);
+  payload += "}";
+
+  bool published = mqttClient.publish(gasTopic, payload.c_str(), true);
+
+  if (published) {
+    Serial.print("Published gas sensor: ");
+    Serial.println(payload);
+  } else {
+    Serial.println("Failed to publish gas sensor.");
   }
 }
 
@@ -206,7 +307,10 @@ void publishLedState(const char* source) {
 
 void setup() {
   Serial.begin(115200);
+  dht.begin();
+  analogReadResolution(12);
   pinMode(rainSensorPin, INPUT);
+  pinMode(gasSensorPin, INPUT);
   pinMode(ledPin, OUTPUT);
   applyLedState(false, "startup");
   connectToWifi();
@@ -229,7 +333,9 @@ void loop() {
 
   if (millis() - lastPublishAt >= publishIntervalMs) {
     lastPublishAt = millis();
-    publishTemperature();
+    publishTemperatureAndHumidity();
+    publishLightSensor();
     publishRainSensor();
+    publishGasSensor();
   }
 }

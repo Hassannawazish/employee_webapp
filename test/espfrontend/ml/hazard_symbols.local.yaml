@@ -1,0 +1,13 @@
+train: 'C:/Users/hassa/Desktop/employee_webapp/test/espfrontend/dataset/hazard symbols.v15i.yolov5pytorch/train/images'
+val: 'C:/Users/hassa/Desktop/employee_webapp/test/espfrontend/dataset/hazard symbols.v15i.yolov5pytorch/valid/images'
+test: 'C:/Users/hassa/Desktop/employee_webapp/test/espfrontend/dataset/hazard symbols.v15i.yolov5pytorch/test/images'
+
+nc: 7
+names:
+  0: Corrosion
+  1: Environment
+  2: Exclamation Mark
+  3: Flame
+  4: Flame Over Circle
+  5: Health Hazard
+  6: Skull and Crossbones
