@@ -415,7 +415,7 @@ function App() {
             </div>
             <div>
               <p className="eyebrow">SCAI Systems</p>
-              <h1>Surveillance des zones 'Produit chimique' et 'Metal d'apport'</h1>
+              <h1>Surveillance des zones 'Produit chimique' et 'Métaux d'apport'</h1>
             </div>
           </div>
 
