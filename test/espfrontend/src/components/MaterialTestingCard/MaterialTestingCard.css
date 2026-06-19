@@ -87,6 +87,90 @@
   background: #e2e8f0;
 }
 
+.material-camera-placeholder {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(135deg, #e0f2fe 0%, #f8fafc 48%, #dcfce7 100%);
+  background-size:
+    28px 28px,
+    28px 28px,
+    auto;
+}
+
+.camera-illustration {
+  position: relative;
+  width: 132px;
+  height: 92px;
+  border: 3px solid #0f172a;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+  box-shadow:
+    0 24px 44px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: cameraFloat 3s ease-in-out infinite;
+}
+
+.camera-illustration::before {
+  content: '';
+  position: absolute;
+  left: 22px;
+  top: -18px;
+  width: 42px;
+  height: 18px;
+  border: 3px solid #0f172a;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: #f8fafc;
+}
+
+.camera-lens {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  border: 9px solid #0ea5e9;
+  border-radius: 50%;
+  background: #0f172a;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    inset 0 0 0 8px #1e293b,
+    0 0 0 8px rgba(14, 165, 233, 0.12);
+  animation: lensPulse 2s ease-in-out infinite;
+}
+
+.camera-flash {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.16);
+  animation: flashBlink 2.6s ease-in-out infinite;
+}
+
+.camera-scan-line {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.78);
+  box-shadow: 0 0 18px rgba(14, 165, 233, 0.6);
+  animation: scanLine 2.8s linear infinite;
+}
+
 .material-side {
   display: grid;
   gap: 16px;
@@ -178,15 +262,88 @@
   display: none;
 }
 
+@keyframes cameraFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes lensPulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 8px #1e293b,
+      0 0 0 8px rgba(14, 165, 233, 0.12);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 0 0 8px #1e293b,
+      0 0 0 14px rgba(14, 165, 233, 0.04);
+  }
+}
+
+@keyframes flashBlink {
+  0%,
+  78%,
+  100% {
+    opacity: 0.55;
+  }
+
+  84% {
+    opacity: 1;
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  12%,
+  88% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(238px);
+    opacity: 0;
+  }
+}
+
 @media (max-width: 980px) {
   .material-body {
     grid-template-columns: 1fr;
   }
 
   .material-preview,
-  .material-preview-image {
+  .material-preview-image,
+  .material-camera-placeholder {
     min-height: 220px;
     height: 220px;
+  }
+
+  @keyframes scanLine {
+    0% {
+      transform: translateY(18px);
+      opacity: 0;
+    }
+
+    12%,
+    88% {
+      opacity: 1;
+    }
+
+    100% {
+      transform: translateY(200px);
+      opacity: 0;
+    }
   }
 }
 

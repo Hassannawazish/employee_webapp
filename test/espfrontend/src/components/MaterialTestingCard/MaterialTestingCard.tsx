@@ -477,6 +477,12 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (cameraState === 'open' && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraState]);
+
   async function openCamera() {
     try {
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -558,6 +564,7 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    setSnapshotUrl(null);
     setCameraState('idle');
     setPlacementImage(null);
   }
@@ -585,8 +592,16 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
           <div className="material-preview">
             {snapshotUrl ? (
               <img src={snapshotUrl} alt="Pictogramme du materiau capture" className="material-preview-image" />
-            ) : (
+            ) : cameraState === 'open' ? (
               <video ref={videoRef} autoPlay playsInline muted className="material-preview-image" />
+            ) : (
+              <div className="material-camera-placeholder" aria-label="Camera fermee">
+                <div className="camera-illustration" aria-hidden="true">
+                  <span className="camera-lens" />
+                  <span className="camera-flash" />
+                </div>
+                <span className="camera-scan-line" aria-hidden="true" />
+              </div>
             )}
           </div>
         </div>

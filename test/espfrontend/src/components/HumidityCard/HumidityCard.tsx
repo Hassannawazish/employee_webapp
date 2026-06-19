@@ -4,7 +4,7 @@ import '../TemperatureCard/TemperatureCard.css';
 
 type HumidityCardProps = {
   roomName: string;
-  topic?: string;
+  topic?: string | null;
 };
 
 function formatTime(value?: string) {
@@ -24,6 +24,12 @@ function HumidityCard({ roomName, topic }: HumidityCardProps) {
   const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
+    if (topic === null) {
+      setReading(null);
+      setStatus('Aucun flux MQTT pour cette salle.');
+      return;
+    }
+
     const subscription = subscribeToHumiditySensor(
       (latestReading) => {
         setReading(latestReading);

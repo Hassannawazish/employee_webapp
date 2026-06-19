@@ -4,8 +4,8 @@ import '../TemperatureCard/TemperatureCard.css';
 
 type LedControlCardProps = {
   roomName: string;
-  commandTopic?: string;
-  stateTopic?: string;
+  commandTopic?: string | null;
+  stateTopic?: string | null;
 };
 
 function formatTime(value?: string) {
@@ -31,6 +31,13 @@ function LedControlCard({
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
+    if (stateTopic === null) {
+      setLedState(null);
+      setStatus('Aucun flux MQTT pour cette salle.');
+      setCommandStatus('Commande indisponible pour cette salle.');
+      return;
+    }
+
     const subscription = subscribeToLedState(
       (latestState) => {
         setLedState(latestState);
@@ -47,6 +54,11 @@ function LedControlCard({
   }, [stateTopic]);
 
   async function handleToggle(nextEnabled: boolean) {
+    if (commandTopic === null) {
+      setCommandStatus('Commande indisponible pour cette salle.');
+      return;
+    }
+
     try {
       setIsSending(true);
       setCommandStatus(nextEnabled ? 'Envoi de la commande de verrouillage...' : 'Envoi de la commande de deverrouillage...');
@@ -62,6 +74,7 @@ function LedControlCard({
 
   const isEnabled = ledState?.enabled ?? false;
   const doorLabel = ledState ? (ledState.enabled ? 'Verrouillee' : 'Deverrouillee') : '--';
+  const controlsDisabled = isSending || commandTopic === null;
 
   return (
     <article className="temperature-card led-card">
@@ -83,7 +96,7 @@ function LedControlCard({
           type="button"
           className={!isEnabled ? 'led-button active' : 'led-button'}
           onClick={() => handleToggle(false)}
-          disabled={isSending}
+          disabled={controlsDisabled}
         >
           Deverrouiller
         </button>
@@ -91,7 +104,7 @@ function LedControlCard({
           type="button"
           className={isEnabled ? 'led-button active' : 'led-button'}
           onClick={() => handleToggle(true)}
-          disabled={isSending}
+          disabled={controlsDisabled}
         >
           Verrouiller
         </button>

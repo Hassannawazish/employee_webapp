@@ -4,7 +4,7 @@ import '../TemperatureCard/TemperatureCard.css';
 
 type GasCardProps = {
   roomName: string;
-  topic?: string;
+  topic?: string | null;
 };
 
 function formatTime(value?: string) {
@@ -24,6 +24,12 @@ function GasCard({ roomName, topic }: GasCardProps) {
   const [status, setStatus] = useState('Connexion a MQTT...');
 
   useEffect(() => {
+    if (topic === null) {
+      setReading(null);
+      setStatus('Aucun flux MQTT pour cette salle.');
+      return;
+    }
+
     const subscription = subscribeToGasSensor(
       (latestReading) => {
         setReading(latestReading);

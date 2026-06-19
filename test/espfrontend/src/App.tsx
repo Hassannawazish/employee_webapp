@@ -47,7 +47,7 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     hasMaterialTesting: true,
     doorAlt: 'Porte du stock chimique',
     doorCaption: "Vue de la porte du stock chimique reliee aux six flux de securite en direct.",
-    fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-chimique-room.jpg.jpeg`,
+    fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-chimique-door.jpeg`,
     doorVariant: 'chimique',
     summaryNote: 'Les sept cartes de cette page affichent les donnees du stock chimique.',
     temperatureTopic: process.env.REACT_APP_ROOM_1_TEMPERATURE_TOPIC,
@@ -66,6 +66,7 @@ const INITIAL_ROOMS: RoomDefinition[] = [
       "Gardez le stock metal d'apport sur sa propre page dediee afin que les cartes de temperature, lumiere, humidite, verrouillage, fumee et controle de porte restent concentrees sur cette zone de stockage technique.",
     doorAlt: "Porte du stock metal d'apport",
     doorCaption: "Vue de la porte du stock metal d'apport reliee aux six flux de surveillance en direct.",
+    fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-metal-apport-door.jpeg`,
     doorVariant: 'metal-apport',
     summaryNote: "Les six cartes de cette page affichent les donnees du stock metal d'apport.",
     temperatureTopic: process.env.REACT_APP_ROOM_2_TEMPERATURE_TOPIC,
@@ -116,6 +117,7 @@ const INITIAL_ROOMS: RoomDefinition[] = [
 
 const DEFAULT_ROOM = INITIAL_ROOMS[0];
 const MIN_ROOM_COUNT = INITIAL_ROOMS.length;
+const LIVE_SENSOR_ROOM_ID = 'room-1';
 
 function getDoorImage(doorVariant: RoomDefinition['doorVariant']) {
   if (doorVariant === 'chimique') {
@@ -318,6 +320,7 @@ function App() {
   }, [pathname, rooms]);
 
   const activeRoom = findRoomByPath(pathname, rooms);
+  const hasLiveSensorTopics = activeRoom.id === LIVE_SENSOR_ROOM_ID;
 
   function navigateToRoom(nextRoom: RoomDefinition) {
     if (nextRoom.pagePath === pathname) {
@@ -415,7 +418,7 @@ function App() {
             </div>
             <div>
               <p className="eyebrow">SCAI Systems</p>
-              <h1>Surveillance des zones 'Produit chimique' et 'Métaux d'apport'</h1>
+              <h1>Surveillance des zones 'Produits chimiques' et 'Métaux d'apport'</h1>
             </div>
           </div>
 
@@ -507,15 +510,15 @@ function App() {
           </div>
 
           <div className="sensor-grid">
-            <TemperatureCard roomName={activeRoom.name} topic={activeRoom.temperatureTopic} />
-            <LightCard roomName={activeRoom.name} topic={activeRoom.lightTopic} />
-            <HumidityCard roomName={activeRoom.name} topic={activeRoom.humidityTopic} />
-            <RainCard roomName={activeRoom.name} topic={activeRoom.rainTopic} />
-            <GasCard roomName={activeRoom.name} topic={activeRoom.gasTopic} />
+            <TemperatureCard roomName={activeRoom.name} topic={hasLiveSensorTopics ? activeRoom.temperatureTopic : null} />
+            <LightCard roomName={activeRoom.name} topic={hasLiveSensorTopics ? activeRoom.lightTopic : null} />
+            <HumidityCard roomName={activeRoom.name} topic={hasLiveSensorTopics ? activeRoom.humidityTopic : null} />
+            <RainCard roomName={activeRoom.name} topic={hasLiveSensorTopics ? activeRoom.rainTopic : null} />
+            <GasCard roomName={activeRoom.name} topic={hasLiveSensorTopics ? activeRoom.gasTopic : null} />
             <LedControlCard
               roomName={activeRoom.name}
-              commandTopic={activeRoom.ledCommandTopic}
-              stateTopic={activeRoom.ledStateTopic}
+              commandTopic={hasLiveSensorTopics ? activeRoom.ledCommandTopic : null}
+              stateTopic={hasLiveSensorTopics ? activeRoom.ledStateTopic : null}
             />
           </div>
           {activeRoom.hasMaterialTesting ? (
