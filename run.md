@@ -11,7 +11,13 @@ cd C:\Users\hassa\Desktop\employee_webapp
 .\run_all.bat
 ```
 
-Keep the opened windows running while using the app.
+Keep the main `run_all.bat` window open while using the app. Press `Ctrl+C` or `Q` in that main window to stop Mosquitto, the YOLO detector, and React together.
+
+If any service window stays open, run:
+
+```powershell
+.\stop_all.bat
+```
 
 ## 1. Start Mosquitto for Arduino and Webapp
 
