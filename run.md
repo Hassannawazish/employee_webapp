@@ -2,6 +2,17 @@
 
 Use these steps to run the MQTT broker, React webapp, YOLO detector, and ESP32 sketch together.
 
+## Quick Start
+
+To start Mosquitto, the YOLO detector API, and the React webapp in separate windows:
+
+```powershell
+cd C:\Users\hassa\Desktop\employee_webapp
+.\run_all.bat
+```
+
+Keep the opened windows running while using the app.
+
 ## 1. Start Mosquitto for Arduino and Webapp
 
 Open PowerShell:
