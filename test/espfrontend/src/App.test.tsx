@@ -14,6 +14,36 @@ beforeEach(() => {
   window.localStorage.clear();
 });
 
+test('refreshes built-in room copy and image paths from current defaults', () => {
+  window.history.pushState({}, '', '/');
+  window.localStorage.setItem(
+    'scai-control-room-pages',
+    JSON.stringify([
+      {
+        id: 'room-1',
+        name: 'Stock chimique',
+        pagePath: '/rooms/room-1',
+        description:
+          'Surveillez les six capteurs, les commandes en direct et le controle de test des materiaux du stock chimique sur une seule vue.',
+        doorAlt: 'Porte du stock chimique',
+        doorCaption: 'Ancienne legende',
+        fixedDoorImageUrl: '/stock-chimique-door.jpeg',
+        doorVariant: 'chimique',
+        summaryNote: 'Ancienne note'
+      }
+    ])
+  );
+
+  render(<App />);
+
+  expect(screen.getByText(/Surveillez, dans une seule vue/i)).toBeInTheDocument();
+  expect(screen.queryByText(/controle de test des materiaux/i)).not.toBeInTheDocument();
+  expect(screen.getByAltText(/porte du stock chimique/i)).toHaveAttribute(
+    'src',
+    '/stock-chimique-room.jpg.jpeg'
+  );
+});
+
 test('renders the default room dashboard', () => {
   window.history.pushState({}, '', '/');
 

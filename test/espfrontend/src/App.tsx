@@ -238,7 +238,7 @@ function loadRooms() {
 
     return parsedRooms.map((room) => {
       const initialRoom = initialRoomById.get(room.id);
-      return initialRoom ? { ...initialRoom, ...room } : room;
+      return initialRoom ? { ...room, ...initialRoom } : room;
     });
   } catch {
     return INITIAL_ROOMS;
@@ -505,7 +505,7 @@ function App() {
               {activeRoom.id === LIVE_SENSOR_ROOM_ID
                 ? "Cette page dédiée regroupe les cartes température, capteur de lumière, capteur d’humidité, état du verrouillage de la porte, détecteur de fumée et contrôle de porte associées au stock de produits chimiques, ainsi que le module de test des matériaux."
                 : activeRoom.id === 'room-2'
-                  ? "Cette page dédiée est réservée aux cartes température, capteur de lumière, capteur d'humidité, état du verrouillage de la porte, détecteur de fumée et contrôle de porte attribuées à Stock métal d'apport."
+                  ? "Cette page dédiée est réservée aux cartes température, capteur de lumière, capteur d'humidité, état du verrouillage de la porte, détecteur de fumée et contrôle de porte attribuées au stock métal d'apport."
                   : `Cette page dédiée est réservée aux cartes Température, Capteur de lumière, Capteur d'humidité, État du verrouillage de la porte, Détecteur de fumée et Contrôle de porte attribuées à ${activeRoom.name}.`}
             </p>
           </div>
