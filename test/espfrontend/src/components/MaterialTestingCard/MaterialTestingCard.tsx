@@ -579,7 +579,7 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
       <div className="material-header">
         <div>
           <p className="material-room">{roomName}</p>
-          <h3 className="material-title">Test des matériaux</h3>
+          <h3 className="material-title">Contrôle des étiquettes des produits chimiques</h3>
         </div>
         <div className="material-status">
           <span className={cameraState === 'open' ? 'material-status-dot live' : 'material-status-dot'} />
@@ -613,8 +613,8 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
 
         <div className="material-side">
           <p className="material-copy">
-            Ouvrez la caméra, capturez le pictogramme d'avertissement sur le matériau, puis
-            laissez l'assistant de la salle vérifier si le symbole est présent.
+            Ouvrez la caméra, capturez le pictogramme d’avertissement sur le matériau, puis
+            laissez l’assistant de la salle vérifier la présence du symbole.
           </p>
           <div className="material-actions">
             <button type="button" className="material-button primary" onClick={openCamera}>

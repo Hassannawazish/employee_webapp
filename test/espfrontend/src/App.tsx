@@ -63,7 +63,7 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     name: "Stock métal d'apport",
     pagePath: '/rooms/room-2',
     description:
-      'Conservez le stock de métal d’apport sur une page dédiée afin que les cartes Température, Lumière, Humidité, Verrouillage, Fumée et Contrôle de porte restent centrées sur cette zone de stockage technique.',
+      'Surveillez le stock de métal d’apport depuis sa propre page dédiée afin que les cartes Température, Lumière, Verrouillage, Fumée et Contrôle de porte restent centrées sur cette zone de stockage technique.',
     doorAlt: "Porte du stock métal d'apport",
     doorCaption: "Vue de la porte du stock métal d'apport reliée aux six flux de surveillance en direct.",
     fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-metal-apport-door.jpeg`,
@@ -503,8 +503,10 @@ function App() {
             <h2>Capteurs de {activeRoom.name}</h2>
             <p>
               {activeRoom.id === LIVE_SENSOR_ROOM_ID
-                ? "Cette page dédiée regroupe les cartes Température, Capteur de lumière, Capteur d’humidité, État du verrouillage de la porte, Détecteur de fumée et Contrôle de porte associées au stock de produits chimiques, ainsi que le module de test des matériaux."
-                : `Cette page dédiée est réservée aux cartes Température, Capteur de lumière, Capteur d'humidité, État du verrouillage de la porte, Détecteur de fumée et Contrôle de porte attribuées à ${activeRoom.name}.`}
+                ? "Cette page dédiée regroupe les cartes température, capteur de lumière, capteur d’humidité, état du verrouillage de la porte, détecteur de fumée et contrôle de porte associées au stock de produits chimiques, ainsi que le module de test des matériaux."
+                : activeRoom.id === 'room-2'
+                  ? "Cette page dédiée est réservée aux cartes température, capteur de lumière, capteur d'humidité, état du verrouillage de la porte, détecteur de fumée et contrôle de porte attribuées à Stock métal d'apport."
+                  : `Cette page dédiée est réservée aux cartes Température, Capteur de lumière, Capteur d'humidité, État du verrouillage de la porte, Détecteur de fumée et Contrôle de porte attribuées à ${activeRoom.name}.`}
             </p>
           </div>
 

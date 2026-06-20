@@ -30,7 +30,7 @@ test('renders the default room dashboard', () => {
   expect(screen.getByRole('heading', { name: /état du verrouillage de la porte/i })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /détecteur de fumée/i })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /contrôle de porte/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /test des matériaux/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /contrôle des étiquettes des produits chimiques/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /ouvrir la caméra/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /prendre une image/i })).toBeInTheDocument();
   expect(screen.getByText(/téléverser une image/i)).toBeInTheDocument();
@@ -50,7 +50,7 @@ test('switches to a dedicated page for another room', async () => {
   expect(screen.getByAltText(/porte de la salle 4/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^salle 4$/i })).toHaveAttribute('aria-current', 'page');
   expect(screen.getByText(/téléverser une image/i)).toBeInTheDocument();
-  expect(screen.queryByText(/test des matériaux/i)).not.toBeInTheDocument();
+  expect(screen.queryByText(/contrôle des étiquettes des produits chimiques/i)).not.toBeInTheDocument();
   expect(screen.getAllByText(/^salle 4$/i)).toHaveLength(8);
 });
 
