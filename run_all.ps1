@@ -39,6 +39,29 @@ function Stop-StackProcesses {
   }
 }
 
+function Test-DetectorHealth {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Url
+  )
+
+  $healthUrl = "$Url/health"
+
+  for ($attempt = 1; $attempt -le 10; $attempt += 1) {
+    try {
+      $response = Invoke-RestMethod -Uri $healthUrl -TimeoutSec 2
+      Write-Host "YOLO detector health check ready: $healthUrl"
+      return $true
+    } catch {
+      Start-Sleep -Seconds 1
+    }
+  }
+
+  Write-Host "Warning: YOLO detector did not answer at $healthUrl"
+  Write-Host 'Check the "SCAI YOLO Detector" window for Python errors.'
+  return $false
+}
+
 function Wait-ForStopSignal {
   [Console]::TreatControlCAsInput = $true
 
@@ -68,22 +91,22 @@ Write-Host ''
 try {
   Start-StackWindow `
     -Title 'SCAI Mosquitto MQTT' `
-    -WorkingDirectory $mosquittoDir `
-    -Command 'call ".\run-mosquitto-dev.bat"' | Out-Null
+    -WorkingDirectory $root `
+    -Command 'call ".\run_mosquitto.bat"' | Out-Null
 
   Start-Sleep -Seconds 2
 
   Start-StackWindow `
     -Title 'SCAI YOLO Detector' `
-    -WorkingDirectory $frontendDir `
-    -Command 'set "KMP_DUPLICATE_LIB_OK=TRUE" && python ".\ml\serve_hazard_detector.py"' | Out-Null
+    -WorkingDirectory $root `
+    -Command 'call ".\run_detector.bat"' | Out-Null
 
-  Start-Sleep -Seconds 2
+  Test-DetectorHealth -Url $hazardDetectionUrl | Out-Null
 
   Start-StackWindow `
     -Title 'SCAI React Webapp' `
-    -WorkingDirectory $frontendDir `
-    -Command "set `"REACT_APP_MQTT_URL=$mqttUrl`" && set `"REACT_APP_HAZARD_DETECTION_URL=$hazardDetectionUrl`" && npm.cmd start" | Out-Null
+    -WorkingDirectory $root `
+    -Command 'call ".\run_webapp.bat"' | Out-Null
 
   Write-Host 'Started all services in separate windows.'
   Write-Host ''

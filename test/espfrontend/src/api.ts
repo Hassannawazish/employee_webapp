@@ -85,7 +85,7 @@ function subscribeToSensor<TReading>(
   });
 
   client.on('connect', () => {
-    onStatus('Connecte a MQTT');
+    onStatus('Connecté à MQTT');
     client.subscribe(sensor.topic, { qos: 0 }, (error: Error | null) => {
       if (error) {
         onStatus("Impossible de s'abonner au sujet MQTT.");
@@ -96,7 +96,7 @@ function subscribeToSensor<TReading>(
   });
 
   client.on('reconnect', () => {
-    onStatus('Reconnexion a MQTT...');
+    onStatus('Reconnexion à MQTT...');
   });
 
   client.on('offline', () => {
@@ -132,8 +132,8 @@ export function subscribeToTemperature(
   return subscribeToSensor<TemperatureReading>(
     {
       topic,
-      waitingStatus: 'En attente de la mesure de temperature...',
-      invalidPayloadStatus: 'Mesure de temperature recue invalide.'
+      waitingStatus: 'En attente de la mesure de température...',
+      invalidPayloadStatus: 'Mesure de température reçue invalide.'
     },
     onReading,
     onStatus
@@ -148,8 +148,8 @@ export function subscribeToRainSensor(
   return subscribeToSensor<RainReading>(
     {
       topic,
-      waitingStatus: "En attente de l'etat de verrouillage de la porte...",
-      invalidPayloadStatus: 'Etat de verrouillage de la porte recu invalide.'
+      waitingStatus: "En attente de l'état de verrouillage de la porte...",
+      invalidPayloadStatus: 'État de verrouillage de la porte reçu invalide.'
     },
     onReading,
     onStatus
@@ -164,8 +164,8 @@ export function subscribeToLightSensor(
   return subscribeToSensor<LightReading>(
     {
       topic,
-      waitingStatus: 'En attente de la mesure du capteur de lumiere...',
-      invalidPayloadStatus: 'Mesure du capteur de lumiere recue invalide.'
+      waitingStatus: 'En attente de la mesure du capteur de lumière...',
+      invalidPayloadStatus: 'Mesure du capteur de lumière reçue invalide.'
     },
     onReading,
     onStatus
@@ -180,8 +180,8 @@ export function subscribeToHumiditySensor(
   return subscribeToSensor<HumidityReading>(
     {
       topic,
-      waitingStatus: "En attente de la mesure d'humidite...",
-      invalidPayloadStatus: "Mesure d'humidite recue invalide."
+      waitingStatus: "En attente de la mesure d'humidité...",
+      invalidPayloadStatus: "Mesure d'humidité reçue invalide."
     },
     onReading,
     onStatus
@@ -196,8 +196,8 @@ export function subscribeToGasSensor(
   return subscribeToSensor<GasReading>(
     {
       topic,
-      waitingStatus: 'En attente de la mesure du detecteur de fumee...',
-      invalidPayloadStatus: 'Mesure du detecteur de fumee recue invalide.'
+      waitingStatus: 'En attente de la mesure du détecteur de fumée...',
+      invalidPayloadStatus: 'Mesure du détecteur de fumée reçue invalide.'
     },
     onReading,
     onStatus
@@ -212,8 +212,8 @@ export function subscribeToLedState(
   return subscribeToSensor<LedState>(
     {
       topic,
-      waitingStatus: "En attente de l'etat du controle de porte...",
-      invalidPayloadStatus: 'Etat du controle de porte recu invalide.'
+      waitingStatus: "En attente de l'état du contrôle de porte...",
+      invalidPayloadStatus: 'État du contrôle de porte reçu invalide.'
     },
     onReading,
     onStatus
@@ -285,7 +285,7 @@ export function publishLedCommand(
     client.on('close', () => {
       if (!settled) {
         settled = true;
-        reject(new Error("La connexion MQTT s'est fermee avant l'envoi de la commande de porte."));
+        reject(new Error("La connexion MQTT s'est fermée avant l'envoi de la commande de porte."));
       }
     });
   });

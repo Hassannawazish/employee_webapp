@@ -32,6 +32,8 @@ type TemplateMask = {
 
 const TEMPLATE_SIZE = 40;
 const RIGHT_SIDE_MATCH_THRESHOLD = 0.34;
+const CAMERA_ANALYSIS_WIDTH = 640;
+const CAMERA_ANALYSIS_MIN_HEIGHT = 360;
 const HAZARD_DETECTION_URL = process.env.REACT_APP_HAZARD_DETECTION_URL;
 const LEFT_SIDE_HAZARD_LABEL = 'Skull and Crossbones';
 
@@ -344,7 +346,7 @@ function analyzeHazardSign(imageData: ImageData, templates: TemplateMask[]): Det
   if (bestTemplateMatch.score >= RIGHT_SIDE_MATCH_THRESHOLD) {
     return {
       detected: true,
-      message: 'Veuillez placer le materiau sur le cote droit',
+      message: 'Veuillez placer le matériel sur le côté droit.',
       placement: 'right',
       source: 'browser-fallback'
     };
@@ -375,7 +377,7 @@ function analyzeHazardSign(imageData: ImageData, templates: TemplateMask[]): Det
     if (isExclamationMark || isFlameSymbol || isHealthHazardSymbol) {
       return {
         detected: true,
-        message: 'Veuillez placer le materiau sur le cote droit',
+        message: 'Veuillez placer le matériel sur le côté droit.',
         placement: 'right',
         source: 'browser-fallback'
       };
@@ -394,7 +396,7 @@ function analyzeHazardSign(imageData: ImageData, templates: TemplateMask[]): Det
 
   return {
     detected: true,
-    message: 'Veuillez placer le materiau sur le cote gauche',
+    message: 'Veuillez placer le matériel sur le côté gauche.',
     placement: 'left',
     source: 'browser-fallback'
   };
@@ -408,20 +410,20 @@ function buildModelDetectionResult(detection: ModelDetection | undefined): Detec
   if (!detection) {
     return {
       detected: false,
-      message: 'Aucun pictogramme reconnu par le modele. Vous devez demander au responsable',
+      message: 'Aucun pictogramme reconnu par le modèle. Vous devez demander au responsable.',
       placement: null,
       source: 'yolo-model'
     };
   }
 
   const placement = getPlacementForHazardLabel(detection.label);
-  const direction = placement === 'right' ? 'cote droit' : 'cote gauche';
+  const direction = placement === 'right' ? 'côté droit' : 'côté gauche';
 
   return {
     confidence: detection.confidence,
     detected: true,
     label: detection.label,
-    message: `${detection.label} detecte. Veuillez placer le materiau sur le ${direction}.`,
+    message: `Veuillez placer le matériel sur le ${direction}.`,
     placement,
     source: 'yolo-model'
   };
@@ -459,7 +461,7 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
   const [templates, setTemplates] = useState<TemplateMask[]>([]);
   const [placementImage, setPlacementImage] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState(
-    "Capturez une image pour verifier le pictogramme d'avertissement."
+    "Capturez une image pour vérifier le pictogramme d'avertissement."
   );
 
   useEffect(() => {
@@ -500,16 +502,16 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
       }
 
       setCameraState('open');
-      setResultMessage('Camera prete. Prenez une photo du pictogramme du materiau.');
+      setResultMessage('Caméra prête. Prenez une photo du pictogramme du matériau.');
     } catch {
       setCameraState('error');
-      setResultMessage("Impossible d'ouvrir la camera. Veuillez verifier l'autorisation de la camera.");
+      setResultMessage("Impossible d'ouvrir la caméra. Veuillez vérifier l'autorisation de la caméra.");
     }
   }
 
   function retakeImage() {
     setSnapshotUrl(null);
-    setResultMessage('Camera en attente');
+    setResultMessage('Caméra en attente');
     void openCamera();
   }
 
@@ -517,18 +519,21 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.videoWidth === 0 || video.videoHeight === 0) {
-      setResultMessage("Le flux de la camera n'est pas encore pret.");
+      setResultMessage("Le flux de la caméra n'est pas encore prêt.");
       return;
     }
 
-    const targetWidth = 240;
-    const targetHeight = Math.max(180, Math.round((video.videoHeight / video.videoWidth) * targetWidth));
+    const targetWidth = CAMERA_ANALYSIS_WIDTH;
+    const targetHeight = Math.max(
+      CAMERA_ANALYSIS_MIN_HEIGHT,
+      Math.round((video.videoHeight / video.videoWidth) * targetWidth)
+    );
     canvas.width = targetWidth;
     canvas.height = targetHeight;
 
     const context = canvas.getContext('2d');
     if (!context) {
-      setResultMessage("Impossible d'analyser l'image capturee.");
+      setResultMessage("Impossible d'analyser l'image capturée.");
       return;
     }
 
@@ -538,13 +543,13 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
 
     let detection = analyzeHazardSign(imageData, templates);
     if (HAZARD_DETECTION_URL) {
-      setResultMessage('Analyse du pictogramme avec le modele YOLO...');
+      setResultMessage('Analyse du pictogramme avec le modèle...');
       try {
         detection = (await detectHazardSignWithModel(nextSnapshotUrl)) ?? detection;
       } catch {
         detection = {
           ...detection,
-          message: `${detection.message} (modele YOLO indisponible, analyse locale utilisee).`
+          message: `${detection.message} (modèle indisponible, analyse locale utilisée).`
         };
       }
     }
@@ -574,16 +579,16 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
       <div className="material-header">
         <div>
           <p className="material-room">{roomName}</p>
-          <h3 className="material-title">Test des materiaux</h3>
+          <h3 className="material-title">Test des matériaux</h3>
         </div>
         <div className="material-status">
           <span className={cameraState === 'open' ? 'material-status-dot live' : 'material-status-dot'} />
           <span>
             {cameraState === 'open'
-              ? 'Camera active'
+              ? 'Caméra active'
               : cameraState === 'error'
-                ? 'Camera indisponible'
-                : 'Camera en attente'}
+                ? 'Caméra indisponible'
+                : 'Caméra en attente'}
           </span>
         </div>
       </div>
@@ -591,11 +596,11 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
         <div className="material-preview-wrap">
           <div className="material-preview">
             {snapshotUrl ? (
-              <img src={snapshotUrl} alt="Pictogramme du materiau capture" className="material-preview-image" />
+              <img src={snapshotUrl} alt="Pictogramme du matériau capturé" className="material-preview-image" />
             ) : cameraState === 'open' ? (
               <video ref={videoRef} autoPlay playsInline muted className="material-preview-image" />
             ) : (
-              <div className="material-camera-placeholder" aria-label="Camera fermee">
+              <div className="material-camera-placeholder" aria-label="Caméra fermée">
                 <div className="camera-illustration" aria-hidden="true">
                   <span className="camera-lens" />
                   <span className="camera-flash" />
@@ -608,12 +613,12 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
 
         <div className="material-side">
           <p className="material-copy">
-            Ouvrez la camera, capturez le pictogramme d'avertissement sur le materiau, puis
-            laissez l'assistant de la salle verifier si le symbole est present.
+            Ouvrez la caméra, capturez le pictogramme d'avertissement sur le matériau, puis
+            laissez l'assistant de la salle vérifier si le symbole est présent.
           </p>
           <div className="material-actions">
             <button type="button" className="material-button primary" onClick={openCamera}>
-              Ouvrir la camera
+              Ouvrir la caméra
             </button>
             <button type="button" className="material-button" onClick={captureImage}>
               Prendre une image
@@ -627,13 +632,13 @@ function MaterialTestingCard({ roomName }: MaterialTestingCardProps) {
           </div>
 
           <div className="material-result-panel">
-            <p className="material-result-label">Resultat de detection</p>
+            <p className="material-result-label">Résultat de détection</p>
             <p className="material-result">{resultMessage}</p>
             {placementImage ? (
               <div className="material-placement">
                 <img
                   src={placementImage}
-                  alt="Position suggeree du materiau"
+                  alt="Position suggérée du matériau"
                   className="material-placement-image"
                 />
               </div>

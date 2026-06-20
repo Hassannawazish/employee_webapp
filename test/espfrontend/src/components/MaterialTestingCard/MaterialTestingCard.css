@@ -82,9 +82,10 @@
 .material-preview-image {
   width: 100%;
   height: 260px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   display: block;
-  background: #e2e8f0;
+  background: #0f172a;
 }
 
 .material-camera-placeholder {

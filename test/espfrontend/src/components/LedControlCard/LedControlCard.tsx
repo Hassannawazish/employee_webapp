@@ -10,7 +10,7 @@ type LedControlCardProps = {
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'En attente de la premiere mise a jour';
+    return 'En attente de la première mise à jour';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -26,8 +26,8 @@ function LedControlCard({
   stateTopic
 }: LedControlCardProps) {
   const [ledState, setLedState] = useState<LedState | null>(null);
-  const [status, setStatus] = useState('Connexion a MQTT...');
-  const [commandStatus, setCommandStatus] = useState('Pret a envoyer');
+  const [status, setStatus] = useState('Connexion à MQTT...');
+  const [commandStatus, setCommandStatus] = useState('Prêt à envoyer');
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
@@ -61,9 +61,9 @@ function LedControlCard({
 
     try {
       setIsSending(true);
-      setCommandStatus(nextEnabled ? 'Envoi de la commande de verrouillage...' : 'Envoi de la commande de deverrouillage...');
+      setCommandStatus(nextEnabled ? 'Envoi de la commande de verrouillage...' : 'Envoi de la commande de déverrouillage...');
       await publishLedCommand(nextEnabled, commandTopic);
-      setCommandStatus(nextEnabled ? 'Commande de verrouillage envoyee.' : 'Commande de deverrouillage envoyee.');
+      setCommandStatus(nextEnabled ? 'Commande de verrouillage envoyée.' : 'Commande de déverrouillage envoyée.');
     } catch (error) {
       const message = error instanceof Error ? error.message : "Impossible d'envoyer la commande de porte.";
       setCommandStatus(message);
@@ -73,21 +73,21 @@ function LedControlCard({
   }
 
   const isEnabled = ledState?.enabled ?? false;
-  const doorLabel = ledState ? (ledState.enabled ? 'Verrouillee' : 'Deverrouillee') : '--';
+  const doorLabel = ledState ? (ledState.enabled ? 'Verrouillée' : 'Déverrouillée') : '--';
   const controlsDisabled = isSending || commandTopic === null;
 
   return (
     <article className="temperature-card led-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Controle de porte</h3>
+        <h3 className="card-title">Contrôle de porte</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Etat actuel du controle de porte ${doorLabel}`}>
+      <div className="gauge" aria-label={`État actuel du contrôle de porte ${doorLabel}`}>
         <span>{doorLabel}</span>
       </div>
 
@@ -98,7 +98,7 @@ function LedControlCard({
           onClick={() => handleToggle(false)}
           disabled={controlsDisabled}
         >
-          Deverrouiller
+          Déverrouiller
         </button>
         <button
           type="button"
@@ -118,7 +118,7 @@ function LedControlCard({
           <dd>{ledState?.pin ?? '--'}</dd>
         </div>
         <div>
-          <dt>Etat</dt>
+          <dt>État</dt>
           <dd>{doorLabel}</dd>
         </div>
         <div>
@@ -126,7 +126,7 @@ function LedControlCard({
           <dd>{ledState?.source ?? 'Commande MQTT de porte'}</dd>
         </div>
         <div>
-          <dt>Mise a jour</dt>
+          <dt>Mise à jour</dt>
           <dd>{formatTime(ledState?.recordedAtUtc)}</dd>
         </div>
       </dl>

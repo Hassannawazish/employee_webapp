@@ -9,7 +9,7 @@ type HumidityCardProps = {
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'En attente de la premiere mesure';
+    return 'En attente de la première mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -21,7 +21,7 @@ function formatTime(value?: string) {
 
 function HumidityCard({ roomName, topic }: HumidityCardProps) {
   const [reading, setReading] = useState<HumidityReading | null>(null);
-  const [status, setStatus] = useState('Connexion a MQTT...');
+  const [status, setStatus] = useState('Connexion à MQTT...');
 
   useEffect(() => {
     if (topic === null) {
@@ -51,14 +51,14 @@ function HumidityCard({ roomName, topic }: HumidityCardProps) {
     <article className="temperature-card humidity-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Capteur d'humidite</h3>
+        <h3 className="card-title">Capteur d'humidité</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Niveau actuel du capteur d'humidite ${humidity}`}>
+      <div className="gauge" aria-label={`Niveau actuel du capteur d'humidité ${humidity}`}>
         <span>{humidity}</span>
       </div>
 
@@ -69,14 +69,14 @@ function HumidityCard({ roomName, topic }: HumidityCardProps) {
         </div>
         <div>
           <dt>Mesure</dt>
-          <dd>Humidite</dd>
+          <dd>Humidité</dd>
         </div>
         <div>
           <dt>Niveau</dt>
           <dd>{humidity}</dd>
         </div>
         <div>
-          <dt>Mise a jour</dt>
+          <dt>Mise à jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>

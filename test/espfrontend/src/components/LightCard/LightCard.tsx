@@ -9,7 +9,7 @@ type LightCardProps = {
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'En attente de la premiere mesure';
+    return 'En attente de la première mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -21,7 +21,7 @@ function formatTime(value?: string) {
 
 function LightCard({ roomName, topic }: LightCardProps) {
   const [reading, setReading] = useState<LightReading | null>(null);
-  const [status, setStatus] = useState('Connexion a MQTT...');
+  const [status, setStatus] = useState('Connexion à MQTT...');
 
   useEffect(() => {
     if (topic === null) {
@@ -51,14 +51,14 @@ function LightCard({ roomName, topic }: LightCardProps) {
     <article className="temperature-card light-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Capteur de lumiere</h3>
+        <h3 className="card-title">Capteur de lumière</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Niveau actuel du capteur de lumiere ${lightLevel}`}>
+      <div className="gauge" aria-label={`Niveau actuel du capteur de lumière ${lightLevel}`}>
         <span>{lightLevel}</span>
       </div>
 
@@ -69,14 +69,14 @@ function LightCard({ roomName, topic }: LightCardProps) {
         </div>
         <div>
           <dt>Mesure</dt>
-          <dd>Niveau de lumiere</dd>
+          <dd>Niveau de lumière</dd>
         </div>
         <div>
           <dt>Niveau</dt>
           <dd>{lightLevel}</dd>
         </div>
         <div>
-          <dt>Mise a jour</dt>
+          <dt>Mise à jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>

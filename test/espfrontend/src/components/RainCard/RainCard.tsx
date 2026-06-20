@@ -9,7 +9,7 @@ type RainCardProps = {
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'En attente de la premiere mesure';
+    return 'En attente de la première mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -21,7 +21,7 @@ function formatTime(value?: string) {
 
 function RainCard({ roomName, topic }: RainCardProps) {
   const [reading, setReading] = useState<RainReading | null>(null);
-  const [status, setStatus] = useState('Connexion a MQTT...');
+  const [status, setStatus] = useState('Connexion à MQTT...');
 
   useEffect(() => {
     if (topic === null) {
@@ -45,21 +45,21 @@ function RainCard({ roomName, topic }: RainCardProps) {
     };
   }, [topic]);
 
-  const doorLockState = reading ? (reading.rainDetected ? 'Verrouillee' : 'Deverrouillee') : '--';
+  const doorLockState = reading ? (reading.rainDetected ? 'Verrouillée' : 'Déverrouillée') : '--';
   const digitalState = reading ? String(reading.digitalState) : '--';
 
   return (
     <article className="temperature-card rain-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Etat du verrouillage de la porte</h3>
+        <h3 className="card-title">État du verrouillage de la porte</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Etat actuel du verrouillage de la porte ${doorLockState}`}>
+      <div className="gauge" aria-label={`État actuel du verrouillage de la porte ${doorLockState}`}>
         <span>{doorLockState}</span>
       </div>
 
@@ -69,11 +69,11 @@ function RainCard({ roomName, topic }: RainCardProps) {
           <dd>{reading?.pin ?? '--'}</dd>
         </div>
         <div>
-          <dt>Etat numerique</dt>
+          <dt>État numérique</dt>
           <dd>{digitalState}</dd>
         </div>
         <div>
-          <dt>Acces</dt>
+          <dt>Accès</dt>
           <dd>Verrou principal</dd>
         </div>
         <div>
@@ -81,7 +81,7 @@ function RainCard({ roomName, topic }: RainCardProps) {
           <dd>{doorLockState}</dd>
         </div>
         <div>
-          <dt>Updated</dt>
+          <dt>Mise à jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>

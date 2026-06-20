@@ -24,17 +24,17 @@ test('renders the default room dashboard', () => {
   expect(screen.getByText(/capteurs de stock chimique/i)).toBeInTheDocument();
   expect(screen.getByAltText(/porte du stock chimique/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^stock chimique$/i })).toHaveAttribute('aria-current', 'page');
-  expect(screen.getByRole('heading', { name: /capteur de temperature/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /capteur de lumiere/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /capteur d'humidite/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /etat du verrouillage de la porte/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /detecteur de fumee/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /controle de porte/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /test des materiaux/i })).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: /ouvrir la camera/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /capteur de température/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /capteur de lumière/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /capteur d'humidité/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /état du verrouillage de la porte/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /détecteur de fumée/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /contrôle de porte/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /test des matériaux/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /ouvrir la caméra/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /prendre une image/i })).toBeInTheDocument();
-  expect(screen.getByText(/televerser une image/i)).toBeInTheDocument();
-  expect(screen.getAllByText(/connexion a mqtt/i)).toHaveLength(6);
+  expect(screen.getByText(/téléverser une image/i)).toBeInTheDocument();
+  expect(screen.getAllByText(/connexion à mqtt/i)).toHaveLength(6);
 });
 
 test('switches to a dedicated page for another room', async () => {
@@ -49,8 +49,8 @@ test('switches to a dedicated page for another room', async () => {
   expect(screen.getByText(/capteurs de salle 4/i)).toBeInTheDocument();
   expect(screen.getByAltText(/porte de la salle 4/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^salle 4$/i })).toHaveAttribute('aria-current', 'page');
-  expect(screen.getByText(/televerser une image/i)).toBeInTheDocument();
-  expect(screen.queryByText(/test des materiaux/i)).not.toBeInTheDocument();
+  expect(screen.getByText(/téléverser une image/i)).toBeInTheDocument();
+  expect(screen.queryByText(/test des matériaux/i)).not.toBeInTheDocument();
   expect(screen.getAllByText(/^salle 4$/i)).toHaveLength(8);
 });
 
@@ -65,12 +65,12 @@ test('adds a new room page with the same sensor layout', async () => {
   expect(screen.getByText(/surveillance des zones 'produits chimiques' et 'métaux d'apport'/i)).toBeInTheDocument();
   expect(screen.getByText(/capteurs de salle 5/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^salle 5$/i })).toHaveAttribute('aria-current', 'page');
-  expect(screen.getByRole('heading', { name: /capteur de temperature/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /capteur de lumiere/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /capteur d'humidite/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /etat du verrouillage de la porte/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /detecteur de fumee/i })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /controle de porte/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /capteur de température/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /capteur de lumière/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /capteur d'humidité/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /état du verrouillage de la porte/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /détecteur de fumée/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /contrôle de porte/i })).toBeInTheDocument();
 });
 
 test('removes the active extra room page', async () => {

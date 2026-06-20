@@ -33,9 +33,18 @@
 }
 
 .temperature-card.led-card .gauge {
+  width: 124px;
+  height: 124px;
   background:
     radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
     conic-gradient(from 220deg, #facc15, #f59e0b, #f97316, #facc15);
+}
+
+.temperature-card.led-card .gauge span {
+  max-width: 94px;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .temperature-card.gas-card .gauge {
