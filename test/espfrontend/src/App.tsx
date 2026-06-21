@@ -63,7 +63,7 @@ const INITIAL_ROOMS: RoomDefinition[] = [
     name: "Stock métal d'apport",
     pagePath: '/rooms/room-2',
     description:
-      'Surveillez le stock de métal d’apport depuis sa propre page dédiée afin que les cartes Température, Lumière, Verrouillage, Fumée et Contrôle de porte restent centrées sur cette zone de stockage technique.',
+      'Surveillez le stock de métal d’apport depuis sa propre page dédiée afin que les cartes température, lumière, verrouillage, fumée et contrôle de porte restent centrées sur cette zone de stockage technique.',
     doorAlt: "Porte du stock métal d'apport",
     doorCaption: "Vue de la porte du stock métal d'apport reliée aux six flux de surveillance en direct.",
     fixedDoorImageUrl: `${process.env.PUBLIC_URL}/stock-metal-apport-door.jpeg`,
@@ -321,6 +321,7 @@ function App() {
 
   const activeRoom = findRoomByPath(pathname, rooms);
   const hasLiveSensorTopics = activeRoom.id === LIVE_SENSOR_ROOM_ID;
+  const sensorHeadingRoomName = activeRoom.id === LIVE_SENSOR_ROOM_ID ? 'stock chimique' : activeRoom.name;
 
   function navigateToRoom(nextRoom: RoomDefinition) {
     if (nextRoom.pagePath === pathname) {
@@ -500,7 +501,7 @@ function App() {
         <div className="sensor-panel">
           <div className="sensor-panel-copy">
             <p className="sensor-panel-kicker">Flux en direct</p>
-            <h2>Capteurs de {activeRoom.name}</h2>
+            <h2>Capteurs de {sensorHeadingRoomName}</h2>
             <p>
               {activeRoom.id === LIVE_SENSOR_ROOM_ID
                 ? "Cette page dédiée regroupe les cartes température, capteur de lumière, capteur d’humidité, état du verrouillage de la porte, détecteur de fumée et contrôle de porte associées au stock de produits chimiques, ainsi que le module de test des matériaux."
