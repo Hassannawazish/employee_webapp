@@ -1,6 +1,6 @@
 {
-  "short_name": "SCAI",
-  "name": "SCAI Systems Control Room",
+  "short_name": "Surveillance",
+  "name": "Surveillance des zones 'Produits chimiques' et 'Métaux d'apport'",
   "icons": [
     {
       "src": "scai-logo.svg",

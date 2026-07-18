@@ -4,12 +4,12 @@ import './TemperatureCard.css';
 
 type TemperatureCardProps = {
   roomName: string;
-  topic?: string;
+  topic?: string | null;
 };
 
 function formatTime(value?: string) {
   if (!value) {
-    return 'En attente de la premiere mesure';
+    return 'En attente de la première mesure';
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -21,9 +21,15 @@ function formatTime(value?: string) {
 
 function TemperatureCard({ roomName, topic }: TemperatureCardProps) {
   const [reading, setReading] = useState<TemperatureReading | null>(null);
-  const [status, setStatus] = useState('Connexion a MQTT...');
+  const [status, setStatus] = useState('Connexion à MQTT...');
 
   useEffect(() => {
+    if (topic === null) {
+      setReading(null);
+      setStatus('Aucun flux MQTT pour cette salle.');
+      return;
+    }
+
     const subscription = subscribeToTemperature(
       (latestReading) => {
         setReading(latestReading);
@@ -45,14 +51,14 @@ function TemperatureCard({ roomName, topic }: TemperatureCardProps) {
     <article className="temperature-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Capteur de temperature</h3>
+        <h3 className="card-title">Capteur de température</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Niveau actuel du capteur de temperature ${temperature}`}>
+      <div className="gauge" aria-label={`Niveau actuel du capteur de température ${temperature}`}>
         <span>{temperature}</span>
       </div>
 
@@ -63,10 +69,10 @@ function TemperatureCard({ roomName, topic }: TemperatureCardProps) {
         </div>
         <div>
           <dt>Mesure</dt>
-          <dd>Temperature</dd>
+          <dd>Température</dd>
         </div>
         <div>
-          <dt>Mise a jour</dt>
+          <dt>Mise à jour</dt>
           <dd>{formatTime(reading?.recordedAtUtc)}</dd>
         </div>
       </dl>

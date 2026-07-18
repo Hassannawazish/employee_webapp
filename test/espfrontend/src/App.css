@@ -3,7 +3,7 @@
   display: grid;
   align-items: stretch;
   justify-items: center;
-  padding: clamp(14px, 2.2vw, 28px);
+  padding: clamp(8px, 1.2vw, 18px);
   background:
     radial-gradient(circle at top left, rgba(14, 165, 233, 0.16), transparent 32%),
     radial-gradient(circle at 85% 18%, rgba(249, 115, 22, 0.2), transparent 20%),
@@ -11,10 +11,10 @@
 }
 
 .monitor-layout {
-  width: min(100%, 1480px);
+  width: min(100%, 1760px);
   min-height: calc(100vh - clamp(28px, 4.4vw, 56px));
   display: grid;
-  grid-template-columns: minmax(360px, 0.92fr) minmax(0, 1.4fr);
+  grid-template-columns: minmax(390px, 0.95fr) minmax(0, 1.85fr);
   gap: clamp(16px, 2vw, 28px);
   align-items: stretch;
 }
@@ -320,6 +320,10 @@ h1 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   align-content: start;
+}
+
+.material-testing-section {
+  margin-top: 6px;
 }
 
 @keyframes notePulse {

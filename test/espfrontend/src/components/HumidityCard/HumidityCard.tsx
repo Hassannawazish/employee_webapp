@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { LightReading, subscribeToLightSensor } from '../../api';
+import { HumidityReading, subscribeToHumiditySensor } from '../../api';
 import '../TemperatureCard/TemperatureCard.css';
 
-type LightCardProps = {
+type HumidityCardProps = {
   roomName: string;
   topic?: string | null;
 };
@@ -19,8 +19,8 @@ function formatTime(value?: string) {
   }).format(new Date(value));
 }
 
-function LightCard({ roomName, topic }: LightCardProps) {
-  const [reading, setReading] = useState<LightReading | null>(null);
+function HumidityCard({ roomName, topic }: HumidityCardProps) {
+  const [reading, setReading] = useState<HumidityReading | null>(null);
   const [status, setStatus] = useState('Connexion à MQTT...');
 
   useEffect(() => {
@@ -30,7 +30,7 @@ function LightCard({ roomName, topic }: LightCardProps) {
       return;
     }
 
-    const subscription = subscribeToLightSensor(
+    const subscription = subscribeToHumiditySensor(
       (latestReading) => {
         setReading(latestReading);
       },
@@ -45,21 +45,21 @@ function LightCard({ roomName, topic }: LightCardProps) {
     };
   }, [topic]);
 
-  const lightLevel = reading ? `${reading.lightLevel.toFixed(0)} lux` : '-- lux';
+  const humidity = reading ? `${reading.humidityPercent.toFixed(0)}%` : '--%';
 
   return (
-    <article className="temperature-card light-card">
+    <article className="temperature-card humidity-card">
       <div className="card-heading">
         <p className="card-room">{roomName}</p>
-        <h3 className="card-title">Capteur de lumière</h3>
+        <h3 className="card-title">Capteur d'humidité</h3>
       </div>
       <div className="card-topline">
         <span className={status === 'En direct' ? 'status-dot live' : 'status-dot'} />
         <span>{status}</span>
       </div>
 
-      <div className="gauge" aria-label={`Niveau actuel du capteur de lumière ${lightLevel}`}>
-        <span>{lightLevel}</span>
+      <div className="gauge" aria-label={`Niveau actuel du capteur d'humidité ${humidity}`}>
+        <span>{humidity}</span>
       </div>
 
       <dl className="reading-meta">
@@ -69,11 +69,11 @@ function LightCard({ roomName, topic }: LightCardProps) {
         </div>
         <div>
           <dt>Mesure</dt>
-          <dd>Niveau de lumière</dd>
+          <dd>Humidité</dd>
         </div>
         <div>
           <dt>Niveau</dt>
-          <dd>{lightLevel}</dd>
+          <dd>{humidity}</dd>
         </div>
         <div>
           <dt>Mise à jour</dt>
@@ -84,4 +84,4 @@ function LightCard({ roomName, topic }: LightCardProps) {
   );
 }
 
-export default LightCard;
+export default HumidityCard;
